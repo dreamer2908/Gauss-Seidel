@@ -15,8 +15,14 @@ x64/
 x86/
 build/
 bld/
-[Bb]in/
-[Oo]bj/
+./Gauss-Seidel Serial/[Bb]in/
+./Gauss-Seidel Serial/[Oo]bj/
+./Gauss-Seidel Serial.Test/[Bb]in/
+./Gauss-Seidel Serial.Test/[Oo]bj/
+./Gauss-Seidel Parallel/[Bb]in/
+./Gauss-Seidel Parallel/[Oo]bj/
+./Gauss-Seidel Parallel.Test/[Bb]in/
+./Gauss-Seidel Parallel.Test/[Oo]bj/
 
 # Roslyn cache directories
 *.ide/

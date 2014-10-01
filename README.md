@@ -1,2 +1,4 @@
-Parallel-Gauss-Seidel
+Gauss-Seidel
 =====================
+
+Yet another random university project. 
