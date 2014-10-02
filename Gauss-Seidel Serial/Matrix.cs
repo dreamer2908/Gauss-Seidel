@@ -26,22 +26,6 @@ namespace Gauss_Seidel_Serial
             set { _matrix[x, y] = value; }
         }
 
-        private static Random _r = new Random(); // random number generator had better be static
-
-        public void randomFill()
-        {
-            for (int x = 0; x < dim1; x++)
-                for (int y = 0; y < dim2; y++)
-                    this[x, y] = _r.NextDouble();
-        }
-
-        public void zeroFill()
-        {
-            for (int x = 0; x < dim1; x++)
-                for (int y = 0; y < dim2; y++)
-                    this[x, y] = 0;
-        }
-
         static public Matrix unit(int size)
         {
             Matrix re = new Matrix(size, size);
@@ -59,117 +43,25 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        private static Random _r = new Random(); // random number generator had better be static
+
+        public void randomFill()
+        {
+            for (int x = 0; x < dim1; x++)
+                for (int y = 0; y < dim2; y++)
+                    this[x, y] = _r.NextDouble();
+        }
+
+        public void zeroFill()
+        {
+            for (int x = 0; x < dim1; x++)
+                for (int y = 0; y < dim2; y++)
+                    this[x, y] = 0;
+        }
+
         public Boolean isSquare()
         {
             return (this.Height == this.Width);
-        }
-
-        public static Boolean operator ==(Matrix m1, Matrix m2)
-        {
-            return (m1.ToString() == m2.ToString());
-        }
-
-        public static Boolean operator !=(Matrix m1, Matrix m2)
-        {
-            return (m1.ToString() != m2.ToString());
-        }
-
-        public static Matrix operator +(Matrix m1, Matrix m2)
-        {
-            if (m1.Width != m2.Width || m1.Height != m2.Height)
-            {
-                Exception e = new Exception("Two matrixes must be the same in size!");
-                throw e;
-            }
-
-            Matrix re = new Matrix(m1.Height, m2.Width);
-            for (int i = 0; i < re.Height; i++)
-            {
-                for (int j = 0; j < re.Width; j++)
-                {
-                    re[i, j] = m1[i, j] + m2[i, j];
-                }
-            }
-            return re;
-        }
-
-        public static Matrix operator -(Matrix m1, Matrix m2)
-        {
-            return m1 + (m2 * -1);
-        }
-
-        public static Matrix operator *(Matrix m1, Matrix m2)
-        {
-            if (m1.Width != m2.Height) // wrong size
-            {
-                Exception e = new Exception("First matrix's width must be equal with second matrix's height!");
-                throw e;
-            }
-
-            Matrix re = new Matrix(m1.Height, m2.Width);
-            for (int i = 0; i < re.Height; i++)
-            {
-                for (int j = 0; j < re.Width; j++)
-                {
-                    re[i, j] = 0;
-                    for (int k = 0; k < m1.Width; k++)
-                    {
-                        re[i, j] += m1[i, k] * m2[k, j];
-                    }
-                }
-            }
-            return re;
-        }
-
-        public static Matrix operator *(Matrix m1, Double scalar)
-        {
-            Matrix re = new Matrix(m1.Height, m1.Width);
-            for (int i = 0; i < re.Height; i++)
-                for (int j = 0; j < re.Width; j++)
-                    re[i, j] = m1[i, j] * scalar;
-            return re;
-        }
-
-        public static Matrix operator /(Matrix m1, Double scalar)
-        {
-            Matrix re = new Matrix(m1.Height, m1.Width);
-            for (int i = 0; i < re.Height; i++)
-                for (int j = 0; j < re.Width; j++)
-                    re[i, j] = m1[i, j] / scalar;
-            return re;
-        }
-
-        public static Matrix operator /(Matrix m1, Matrix m2)
-        {
-            if (m1.Width != m2.Height || !m2.isSquare()) // wrong size
-            {
-                Exception e = new Exception("First matrix's width must be equal with second matrix's height AND the second matrix must be square!");
-                throw e;
-            }
-
-            Matrix re = new Matrix(m1.Height, m2.Width);
-            for (int i = 0; i < re.Height; i++)
-            {
-                for (int j = 0; j < re.Width; j++)
-                {
-                    re[i, j] = 0;
-                    for (int k = 0; k < m1.Width; k++)
-                    {
-                        re[i, j] += m1[i, k] * m2[k, j];
-                    }
-                }
-            }
-            return m1 * Matrix.Inverse(m2);
-        }
-
-        /// <summary>
-        /// Get the inverse matrix of m
-        /// </summary>
-        /// <param name="m">A square matrix</param>
-        /// <returns>The inverse matrix of m</returns>
-        public static Matrix operator ~(Matrix m)
-        {
-            return Matrix.Inverse(m);
         }
 
         public Double determinant()
@@ -211,6 +103,140 @@ namespace Gauss_Seidel_Serial
             }
 
             return det;
+        }
+
+        public Boolean inversible()
+        {
+            return (this.determinant() != 0);
+        }
+
+        public static Boolean operator ==(Matrix m1, Matrix m2)
+        {
+            return (m1.ToString() == m2.ToString());
+        }
+
+        public static Boolean operator !=(Matrix m1, Matrix m2)
+        {
+            return (m1.ToString() != m2.ToString());
+        }
+
+        public static Matrix operator +(Matrix m1, Matrix m2)
+        {
+            return Add(m1, m2);
+        }
+
+        public static Matrix operator -(Matrix m1, Matrix m2)
+        {
+            return m1 + (m2 * -1);
+        }
+
+        public static Matrix operator *(Matrix m1, Matrix m2)
+        {
+            return Multiply(m1, m2);
+        }
+
+        public static Matrix operator *(Matrix m1, Double scalar)
+        {
+            return Multiply(m1, scalar);
+        }
+
+        public static Matrix operator /(Matrix m1, Matrix m2)
+        {
+            return Divide(m1, m2);
+        }
+
+        public static Matrix operator /(Matrix m1, Double scalar)
+        {
+            return Divide(m1, scalar);
+        }
+
+        // Get the inverse matrix of m
+        public static Matrix operator ~(Matrix m)
+        {
+            return Matrix.Inverse(m);
+        }
+
+        public static Matrix Add(Matrix m1, Matrix m2)
+        {
+            if (m1.Width != m2.Width || m1.Height != m2.Height)
+            {
+                Exception e = new Exception("Two matrixes must be the same in size!");
+                throw e;
+            }
+
+            Matrix re = new Matrix(m1.Height, m2.Width);
+            for (int i = 0; i < re.Height; i++)
+            {
+                for (int j = 0; j < re.Width; j++)
+                {
+                    re[i, j] = m1[i, j] + m2[i, j];
+                }
+            }
+            return re;
+        }
+
+        public static Matrix Multiply(Matrix m1, Matrix m2)
+        {
+            if (m1.Width != m2.Height) // wrong size
+            {
+                Exception e = new Exception("First matrix's width must be equal with second matrix's height!");
+                throw e;
+            }
+
+            Matrix re = new Matrix(m1.Height, m2.Width);
+            for (int i = 0; i < re.Height; i++)
+            {
+                for (int j = 0; j < re.Width; j++)
+                {
+                    re[i, j] = 0;
+                    for (int k = 0; k < m1.Width; k++)
+                    {
+                        re[i, j] += m1[i, k] * m2[k, j];
+                    }
+                }
+            }
+            return re;
+        }
+
+        public static Matrix Multiply(Matrix m1, Double scalar)
+        {
+            Matrix re = new Matrix(m1.Height, m1.Width);
+            for (int i = 0; i < re.Height; i++)
+                for (int j = 0; j < re.Width; j++)
+                    re[i, j] = m1[i, j] * scalar;
+            return re;
+        }
+
+        public static Matrix Divide(Matrix m1, Double scalar)
+        {
+            Matrix re = new Matrix(m1.Height, m1.Width);
+            for (int i = 0; i < re.Height; i++)
+                for (int j = 0; j < re.Width; j++)
+                    re[i, j] = m1[i, j] / scalar;
+            return re;
+        }
+
+        public static Matrix Divide(Matrix m1, Matrix m2)
+        {
+            if (m1.Width != m2.Height || !m2.isSquare()) // wrong size
+            {
+                Exception e = new Exception("First matrix's width must be equal with second matrix's height AND the second matrix must be square!");
+                throw e;
+            }
+
+            Matrix re = new Matrix(m1.Height, m2.Width);
+            for (int i = 0; i < re.Height; i++)
+            {
+                for (int j = 0; j < re.Width; j++)
+                {
+                    re[i, j] = 0;
+                    for (int k = 0; k < m1.Width; k++)
+                    {
+                        re[i, j] += m1[i, k] * m2[k, j];
+                    }
+                }
+            }
+            return m1 * Matrix.Inverse(m2);
         }
 
         public static Matrix Inverse(Matrix m)
@@ -262,6 +288,22 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        public static Matrix Round(Matrix m, Double rouding)
+        {
+            Matrix re = new Matrix(m.Height, m.Width);
+            for (int i = 0; i < re.Height; i++)
+                for (int j = 0; j < re.Width; j++)
+                    re[i, j] = RoundNum(m[i, j], rouding);
+            return re;
+        }
+
+        public void Round(Double rouding)
+        {
+            for (int i = 0; i < this.Height; i++)
+                for (int j = 0; j < this.Width; j++)
+                    this[i, j] = RoundNum(this[i, j], rouding);
+        }
+
         public static void Decompose(Matrix m, out Matrix L, out Matrix U)
         {
             int size = m.Height;
@@ -291,7 +333,17 @@ namespace Gauss_Seidel_Serial
                         U[i, j] = m[i, j];
         }
 
-        public string ToString()
+        public override bool Equals(object obj)
+        {
+            return (this.GetHashCode() == obj.GetHashCode());
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
+
+        public override string ToString()
         {
             String re = "";
             for (int i = 0; i < this.Height; i++)
@@ -308,6 +360,11 @@ namespace Gauss_Seidel_Serial
         private string Format(Double n)
         {
             return String.Format("{0:0.###############}", n);
+        }
+
+        private static Double RoundNum(Double num, Double rounding)
+        {
+            return Math.Floor(num / rounding + 0.5) * rounding;
         }
     }
 }

@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MatrixTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="..\Gauss-Seidel Serial\Matrix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
