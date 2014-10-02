@@ -54,7 +54,7 @@ namespace Gauss_Seidel_Serial.Test
         }
         #endregion
 
-        #region Tests for inverseMatrix
+        #region Tests for Inverse
 
         [TestCase(5, 2, -7, -3)]
         [TestCase(5, 8, 17, 3)]

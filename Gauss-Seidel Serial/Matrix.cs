@@ -20,6 +20,8 @@ namespace Gauss_Seidel_Serial
         public int dim1 { get { return _matrix.GetLength(0); } }
         public int dim2 { get { return _matrix.GetLength(1); } }
 
+        private static Random _r = new Random(); // random number generator had better be static
+
         public Double this[int x, int y]
         {
             get { return _matrix[x, y]; }
@@ -43,7 +45,12 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
-        private static Random _r = new Random(); // random number generator had better be static
+        public void zeroFill()
+        {
+            for (int x = 0; x < dim1; x++)
+                for (int y = 0; y < dim2; y++)
+                    this[x, y] = 0;
+        }
 
         public void randomFill()
         {
@@ -52,18 +59,12 @@ namespace Gauss_Seidel_Serial
                     this[x, y] = _r.NextDouble();
         }
 
-        public void zeroFill()
-        {
-            for (int x = 0; x < dim1; x++)
-                for (int y = 0; y < dim2; y++)
-                    this[x, y] = 0;
-        }
-
         public Boolean isSquare()
         {
             return (this.Height == this.Width);
         }
 
+        // calculate the determinant of this matrix. Supports any size
         public Double determinant()
         {
             if (!this.isSquare())
@@ -105,6 +106,7 @@ namespace Gauss_Seidel_Serial
             return det;
         }
 
+        // check if this matrix can be inversed
         public Boolean inversible()
         {
             return (this.determinant() != 0);
@@ -156,6 +158,7 @@ namespace Gauss_Seidel_Serial
             return Matrix.Inverse(m);
         }
 
+        // Return the sum of m1 and m2. They must be in the same size
         public static Matrix Add(Matrix m1, Matrix m2)
         {
             if (m1.Width != m2.Width || m1.Height != m2.Height)
@@ -175,6 +178,7 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        // Return the product of matrix m1 and m2.
         public static Matrix Multiply(Matrix m1, Matrix m2)
         {
             if (m1.Width != m2.Height) // wrong size
@@ -198,6 +202,7 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        // Scalar multiply matrix m1 by scalar
         public static Matrix Multiply(Matrix m1, Double scalar)
         {
             Matrix re = new Matrix(m1.Height, m1.Width);
@@ -207,6 +212,7 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        // Scalar multiply matrix m1 by 1/scalar
         public static Matrix Divide(Matrix m1, Double scalar)
         {
             Matrix re = new Matrix(m1.Height, m1.Width);
@@ -216,6 +222,7 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        // Calculate product of matrix m1 and the inverse matrix of m2.
         public static Matrix Divide(Matrix m1, Matrix m2)
         {
             if (m1.Width != m2.Height || !m2.isSquare()) // wrong size
@@ -224,21 +231,10 @@ namespace Gauss_Seidel_Serial
                 throw e;
             }
 
-            Matrix re = new Matrix(m1.Height, m2.Width);
-            for (int i = 0; i < re.Height; i++)
-            {
-                for (int j = 0; j < re.Width; j++)
-                {
-                    re[i, j] = 0;
-                    for (int k = 0; k < m1.Width; k++)
-                    {
-                        re[i, j] += m1[i, k] * m2[k, j];
-                    }
-                }
-            }
             return m1 * Matrix.Inverse(m2);
         }
 
+        // Inverse matrix m. By definition, (inverse of m) * m = unit matrix
         public static Matrix Inverse(Matrix m)
         {
             int size = m.Height;
@@ -279,6 +275,7 @@ namespace Gauss_Seidel_Serial
             return re / det;
         }
 
+        // Return a separated copy of matrix m
         public static Matrix Duplicate(Matrix m)
         {
             Matrix re = new Matrix(m.Height, m.Width);
@@ -288,6 +285,8 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        // It's to fix stuff like 0.000000000001 or 0.999999999999999
+        // >>>>>>>float
         public static Matrix Round(Matrix m, Double rouding)
         {
             Matrix re = new Matrix(m.Height, m.Width);
@@ -297,6 +296,8 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        // result will be rounded to multiple of rounding arg
+        // for example: rounding = 0.05, result will be like 0.05, 0.1, 0.15, 0.2, 0.25, 0.3
         public void Round(Double rouding)
         {
             for (int i = 0; i < this.Height; i++)
@@ -304,6 +305,12 @@ namespace Gauss_Seidel_Serial
                     this[i, j] = RoundNum(this[i, j], rouding);
         }
 
+        private static Double RoundNum(Double num, Double rounding)
+        {
+            return Math.Floor(num / rounding + 0.5) * rounding;
+        }
+
+        // Decompose matrix m into lower triangular matrix L and strict upper triangular matrix U
         public static void Decompose(Matrix m, out Matrix L, out Matrix U)
         {
             int size = m.Height;
@@ -360,11 +367,6 @@ namespace Gauss_Seidel_Serial
         private string Format(Double n)
         {
             return String.Format("{0:0.###############}", n);
-        }
-
-        private static Double RoundNum(Double num, Double rounding)
-        {
-            return Math.Floor(num / rounding + 0.5) * rounding;
         }
     }
 }
