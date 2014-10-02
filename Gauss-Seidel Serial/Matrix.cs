@@ -54,6 +54,16 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        static public Matrix zeroLike(Matrix m)
+        {
+            int dim1 = m.dim1, dim2 = m.dim2;
+            Matrix re = new Matrix(dim1, dim2);
+            for (int x = 0; x < dim1; x++)
+                for (int y = 0; y < dim2; y++)
+                    re[x, y] = 0;
+            return re;
+        }
+
         public void zeroFill()
         {
             for (int x = 0; x < dim1; x++)
