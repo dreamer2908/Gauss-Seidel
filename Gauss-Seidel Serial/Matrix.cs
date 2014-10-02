@@ -132,6 +132,11 @@ namespace Gauss_Seidel_Serial
             return m1 + (m2 * -1);
         }
 
+        public static Matrix operator -(Matrix m1)
+        {
+            return (m1 * -1);
+        }
+
         public static Matrix operator *(Matrix m1, Matrix m2)
         {
             return Multiply(m1, m2);
@@ -215,11 +220,7 @@ namespace Gauss_Seidel_Serial
         // Scalar multiply matrix m1 by 1/scalar
         public static Matrix Divide(Matrix m1, Double scalar)
         {
-            Matrix re = new Matrix(m1.Height, m1.Width);
-            for (int i = 0; i < re.Height; i++)
-                for (int j = 0; j < re.Width; j++)
-                    re[i, j] = m1[i, j] / scalar;
-            return re;
+            return Multiply(m1, 1/scalar);
         }
 
         // Calculate product of matrix m1 and the inverse matrix of m2.
