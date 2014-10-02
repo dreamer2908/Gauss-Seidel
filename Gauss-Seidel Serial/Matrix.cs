@@ -83,6 +83,16 @@ namespace Gauss_Seidel_Serial
             return (this.Height == this.Width);
         }
 
+        public Boolean isColumn()
+        {
+            return (this.dim2 == 1);
+        }
+
+        public Boolean isRow()
+        {
+            return (this.dim1 == 1);
+        }
+
         // calculate the determinant of this matrix. Supports any size
         public Double determinant()
         {
@@ -358,6 +368,22 @@ namespace Gauss_Seidel_Serial
                 for (int j = 0; j < size; j++)
                     if (i < j)
                         U[i, j] = m[i, j];
+        }
+
+        // Check if the difference between each pair of values between two matrixes is less than maxDiff
+        public static Boolean AllClose(Matrix m1, Matrix m2, Double maxDiff)
+        {
+            if (m1.Width != m2.Width || m1.Height != m2.Height)
+            {
+                Exception e = new Exception("Two matrixes must be the same in size!");
+                throw e;
+            }
+
+            for (int i = 0; i < m1.Height; i++)
+                for (int j = 0; j < m1.Width; j++)
+                    if (Math.Abs(m1[i, j] - m2[i, j]) > Math.Abs(maxDiff))
+                        return false;
+            return true;
         }
 
         public override bool Equals(object obj)
