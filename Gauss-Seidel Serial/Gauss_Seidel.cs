@@ -7,7 +7,8 @@ namespace Gauss_Seidel_Serial
 {
     class Gauss_Seidel
     {
-        public static Matrix solve(Matrix A, Matrix b)
+        // return true if it converges. Output: solution matrix, loops it took
+       public static Boolean solve(Matrix A, Matrix b, out Matrix x, out int loops)
         {
             // check sanity
             if (!A.isSquare() || !b.isColumn() || (A.Height != b.Height))
@@ -16,24 +17,40 @@ namespace Gauss_Seidel_Serial
                 throw e;
             }
 
-            int ITERATION_LIMIT = 1000;
+            // follow samples in Wikipedia step by step https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method
 
-            Matrix x = Matrix.zeroLike(b);
-            Matrix L, U, L_1, T, C, new_x;
+            // decompose A into the sum of a lower triangular component L* and a strict upper triangular component U
+            Matrix L, U;
             Matrix.Decompose(A, out L, out U);
-            L_1 = ~L;
-            T = -L_1 * U;
-            C = L_1 * b;
+            Matrix L_1 = ~L; // inverse of L*
 
-            int loops = 0;
+            // x (at step k+1) = T * x (at step k) + C
+            // where T = - (inverse of L*) * U and C = (inverse of L*) * b
+            x = Matrix.zeroLike(b); // at step k
+            Matrix new_x = Matrix.zeroLike(x); // at step k + 1
+            Matrix T = -L_1 * U;
+            Matrix C = L_1 * b;
+
+            loops = 0;
+            Boolean converge = false;
+            int ITERATION_LIMIT = 1000; // if it still doesn't converge after this many loops, assume it won't converge and give up
             for (; loops < ITERATION_LIMIT; loops++)
             {
                 new_x = T * x + C;
-                if (Matrix.AllClose(new_x, x, 1e-8))
+                if (converge = Matrix.AllClose(new_x, x, 1e-8)) // converge
                     break;
                 x = new_x;
             }
 
+            return converge;
+        }
+
+        // just use this when u don't care about convergence and loop
+        public static Matrix solve(Matrix A, Matrix b)
+        {
+            Matrix x;
+            int loops;
+            solve(A, b, out x, out loops);
             return x;
         }
     }
