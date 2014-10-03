@@ -306,5 +306,60 @@ namespace Gauss_Seidel_Serial.Test
         }
 
         #endregion
+
+        #region Tests for Transpose
+
+        [Test]
+        public void Transpose_Sample1InWikipedia_ChecksIt()
+        {
+            Matrix A = new Matrix(1, 2);
+            A[0, 0] = 1;
+            A[0, 1] = 2;
+            Matrix expected = new Matrix(2, 1);
+            expected[0, 0] = 1;
+            expected[1, 0] = 2;
+            Matrix re = Matrix.Transpose(A);
+            Assert.AreEqual(expected.ToString(), re.ToString());
+        }
+
+        [Test]
+        public void Transpose_Sample2InWikipedia_ChecksIt()
+        {
+            Matrix A = new Matrix(2, 2);
+            A[0, 0] = 1;
+            A[0, 1] = 2;
+            A[1, 0] = 3;
+            A[1, 1] = 4;
+            Matrix expected = new Matrix(2, 2);
+            expected[0, 0] = 1;
+            expected[0, 1] = 3;
+            expected[1, 0] = 2;
+            expected[1, 1] = 4;
+            Matrix re = Matrix.Transpose(A);
+            Assert.AreEqual(expected.ToString(), re.ToString());
+        }
+
+        [Test]
+        public void Transpose_Sample3InWikipedia_ChecksIt()
+        {
+            Matrix A = new Matrix(3, 2);
+            A[0, 0] = 1;
+            A[0, 1] = 2;
+            A[1, 0] = 3;
+            A[1, 1] = 4;
+            A[2, 0] = 5;
+            A[2, 1] = 6;
+            Matrix expected = new Matrix(2, 3);
+            expected[0, 0] = 1;
+            expected[0, 1] = 3;
+            expected[0, 2] = 5;
+            expected[1, 0] = 2;
+            expected[1, 1] = 4;
+            expected[1, 2] = 6;
+            Matrix re = Matrix.Transpose(A);
+            Assert.AreEqual(expected.ToString(), re.ToString());
+        }
+
+        #endregion
     }
 }
