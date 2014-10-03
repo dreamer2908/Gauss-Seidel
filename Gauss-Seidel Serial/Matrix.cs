@@ -71,11 +71,27 @@ namespace Gauss_Seidel_Serial
                     this[x, y] = 0;
         }
 
+        // fill with random double number in range [0, 1]
         public void randomFill()
         {
             for (int x = 0; x < dim1; x++)
                 for (int y = 0; y < dim2; y++)
                     this[x, y] = _r.NextDouble();
+        }
+
+        static public Matrix random(int dim1, int dim2, Double _min, Double _max)
+        {
+            Matrix re = new Matrix(dim1, dim2);
+            re.randomFill();
+            // check sanity
+            Double min = (_min < _max) ? _min : _max;
+            Double max = (_max > _min) ? _max : _min;
+            if (min == max)
+                max += 1;
+            // scale to max - min range
+            re *= Math.Abs(max - min);
+            re = Matrix.OffsetValue(re, min);
+            return re;
         }
 
         public Boolean isSquare()
@@ -91,6 +107,15 @@ namespace Gauss_Seidel_Serial
         public Boolean isRow()
         {
             return (this.dim1 == 1);
+        }
+
+        public Boolean isZero()
+        {
+            for (int i = 0; i < this.Height; i++)
+                for (int j = 0; j < this.Width; j++)
+                    if (this[i, j] != 0)
+                        return false;
+            return true;
         }
 
         // calculate the determinant of this matrix. Supports any size
@@ -305,6 +330,26 @@ namespace Gauss_Seidel_Serial
             return re / det;
         }
 
+        // add offset to every entries of m 
+        public static Matrix OffsetValue(Matrix m, Double offset)
+        {
+            Matrix re = new Matrix(m.Height, m.Width);
+            for (int i = 0; i < re.Height; i++)
+                for (int j = 0; j < re.Width; j++)
+                    re[i, j] = m[i, j] + offset;
+            return re;
+        }
+
+        // reflect A over its main diagonal (which runs from top-left to bottom-right) to obtain A transpose
+        public static Matrix Transpose(Matrix m)
+        {
+            Matrix re = new Matrix(m.Width, m.Height);
+            for (int i = 0; i < re.Height; i++)
+                for (int j = 0; j < re.Width; j++)
+                    re[i, j] = m[j, i];
+            return re;
+        }
+
         // Return a separated copy of matrix m
         public static Matrix Duplicate(Matrix m)
         {
@@ -413,6 +458,41 @@ namespace Gauss_Seidel_Serial
         private string Format(Double n)
         {
             return String.Format("{0:0.###############}", n);
+        }
+
+        public Boolean isPositiveDefinite()
+        {
+            // In linear algebra, a symmetric n × n real matrix M is said to be positive definite if zTMz is positive for every non-zero column vector z of n real numbers. Here zT denotes the transpose of z.
+
+            if (!this.isSquare()) // only square matrix can be symmetric
+                return false;
+            if (this.ToString() != Matrix.Transpose(this).ToString()) // matrix A is symmetric <=> A = AT
+                return false;
+
+            // now check if it's positive definite
+
+            // generate vector z with random number from -1 to 1. make sure z is non-zero
+            Matrix z = Matrix.random(this.dim1, 1, -1, 1);
+            while (z.isZero())
+                z = Matrix.random(this.dim1, 1, -1, 1);
+            Matrix zT = Matrix.Transpose(z);
+
+            // check zTMz
+            Matrix zTMz = zT * this * z; // should be 1x1
+
+            Boolean re = zTMz[0, 0] > 0;
+
+            // redo the check
+            z = Matrix.random(this.dim1, 1, -10, 10);
+            while (z.isZero())
+                z = Matrix.random(this.dim1, 1, -1, 1);
+            zT = Matrix.Transpose(z);
+            zTMz = zT * this * z;
+
+            // it must pass both checks to be considered positive definite
+            re = re && (zTMz[0, 0] > 0);
+
+            return re;
         }
     }
 }
