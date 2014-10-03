@@ -450,5 +450,27 @@ namespace Gauss_Seidel_Serial.Test
         }
 
         #endregion
+
+        #region Tests for isDiagonallyDominant
+
+        [TestCase(3, -2, 1, 1, -3, 2, -1, 2, 4, true)]
+        [TestCase(-2, 2, 1, 1, 3, 2, 1, -2, 0, false)]
+        [TestCase(-4, 2, 1, 1, 6, 2, 1, -2, 5, true)]
+        public void isDiagonallyDominant_WkiSamples_ChecksThem(int m1_00, int m1_01, int m1_02, int m1_10, int m1_11, int m1_12, int m1_20, int m1_21, int m1_22, Boolean expected)
+        {
+            Matrix m1 = new Matrix(3, 3);
+            m1[0, 0] = m1_00;
+            m1[0, 1] = m1_01;
+            m1[0, 2] = m1_02;
+            m1[1, 0] = m1_10;
+            m1[1, 1] = m1_11;
+            m1[1, 2] = m1_12;
+            m1[2, 0] = m1_20;
+            m1[2, 1] = m1_21;
+            m1[2, 2] = m1_22;
+            Assert.AreEqual(expected, m1.isDiagonallyDominant());
+        }
+
+        #endregion
     }
 }
