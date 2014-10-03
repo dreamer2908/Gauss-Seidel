@@ -504,5 +504,22 @@ namespace Gauss_Seidel_Serial
 
             return re;
         }
+
+        // generate a symmetric positive-definite matrix
+        public static Matrix generateSPDMatrix(int size)
+        {
+            // Follow Daryl's answer here
+            // https://math.stackexchange.com/questions/357980/matlab-code-for-generating-random-symmetric-positive-definite-matrix
+            
+            // generate a random n x n matrix
+            Matrix A = Matrix.random(size, size, -10, 10);
+            // construct a symmetric matrix from it
+            A = A * A;
+            // since A(i,j) < 1 by construction and a symmetric diagonally dominant matrix
+            // is symmetric positive definite, which can be ensured by adding nI
+            A = A + size * Matrix.unit(size);
+            // well done
+            return A;
+        }
     }
 }
