@@ -505,6 +505,27 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        // check if this matrix is diagonally dominant
+        public Boolean isDiagonallyDominant()
+        {
+            // see https://en.wikipedia.org/wiki/Diagonally_dominant_matrix
+            // In mathematics, a matrix is said to be diagonally dominant if for every row of the matrix,
+            // the magnitude of the diagonal entry in a row is larger than or equal to the sum of the
+            // magnitudes of all the other (non-diagonal) entries in that row.
+            // More precisely, the matrix A is diagonally dominant if
+            // | A[i,i] | >= sum(j!=i) of | A[i,j] |
+            for (int i = 0; i < this.dim1; i++)
+            {
+                Double sumOfNonDiagonalEntriesInRow = 0;
+                for (int j = 0; j < this.dim2; j++)
+                    if (j != i)
+                        sumOfNonDiagonalEntriesInRow += Math.Abs(this[i, j]);
+                if (Math.Abs(this[i, i]) < sumOfNonDiagonalEntriesInRow)
+                    return false;
+            }
+            return true;
+        }
+
         // generate a symmetric positive-definite matrix
         public static Matrix generateSPDMatrix(int size)
         {
