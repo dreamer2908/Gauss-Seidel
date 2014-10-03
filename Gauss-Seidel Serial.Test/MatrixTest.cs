@@ -401,5 +401,54 @@ namespace Gauss_Seidel_Serial.Test
         }
 
         #endregion
+
+        #region Tests for isPositiveDefinite
+
+        [Test]
+        public void isPositiveDefinite_unitMatrix_returnsTrue()
+        {
+            Matrix unit = Matrix.unit(10);
+            Boolean re = unit.isPositiveDefinite();
+            Assert.AreEqual(true, re);
+        }
+
+        [Test]
+        public void isPositiveDefinite_zeroMatrix_returnsFalse()
+        {
+            Matrix zero = Matrix.zero(10);
+            Boolean re = zero.isPositiveDefinite();
+            Assert.AreEqual(false, re);
+        }
+
+        [Test]
+        public void isPositiveDefinite_sample2InWiki_returnsTrue()
+        {
+            Matrix m1 = new Matrix(3, 3);
+            m1[0, 0] = 2;
+            m1[0, 1] = -1;
+            m1[0, 2] = 0;
+            m1[1, 0] = -1;
+            m1[1, 1] = 2;
+            m1[1, 2] = -1;
+            m1[2, 0] = 0;
+            m1[2, 1] = -1;
+            m1[2, 2] = 2;
+            Boolean re = m1.isPositiveDefinite();
+            Assert.AreEqual(true, re);
+        }
+
+        [Test]
+        public void isPositiveDefinite_sample3InWiki_returnsFalse()
+        {
+            Matrix m1 = new Matrix(2, 2);
+            m1[0, 0] = 1;
+            m1[0, 1] = 2;
+            m1[1, 0] = 2;
+            m1[1, 1] = 1;
+            Boolean re = m1.isPositiveDefinite();
+            Assert.AreEqual(false, re);
+        }
+
+        #endregion
     }
 }
