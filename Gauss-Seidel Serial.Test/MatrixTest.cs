@@ -361,5 +361,45 @@ namespace Gauss_Seidel_Serial.Test
         }
 
         #endregion
+
+        #region Tests for random
+
+        [TestCase(-21, 3)]
+        [TestCase(-10, 20)]
+        public void random_100x100MatrixesRepeats100TimesVariousRange_ChecksMinMaxAndAverage(Double low, Double high)
+        {
+            Matrix m;
+            Double min = 0, max = 0, count = 0, sum = 0, avg = 0;
+            for (int n = 0; n < 100; n++)
+            {
+                m = Matrix.random(100, 100, low, high);
+                for (int i = 0; i < m.dim1; i++)
+                    for (int j = 0; j < m.dim2; j++)
+                    {
+                        Double val = m[i, j];
+                        if (val < min)
+                            min = val;
+                        if (val > max)
+                            max = val;
+                        count++;
+                        sum += val;
+                    }
+            }
+            avg = sum / count;
+
+            Console.WriteLine("min = " + min.ToString());
+            Console.WriteLine("min expected = " + low.ToString());
+            Console.WriteLine("max = " + max.ToString());
+            Console.WriteLine("max expected = " + high.ToString());
+            // Console.WriteLine("sum = " + sum.ToString());
+            Console.WriteLine("avg = " + avg.ToString());
+            Console.WriteLine("avg expected = " + ((low + high) / 2).ToString());
+
+            Assert.GreaterOrEqual(min, low);
+            Assert.LessOrEqual(max, high);
+            Assert.LessOrEqual(Math.Abs(avg - ((low + high) / 2)), 1); // avg mustn't difer too much from 
+        }
+
+        #endregion
     }
 }
