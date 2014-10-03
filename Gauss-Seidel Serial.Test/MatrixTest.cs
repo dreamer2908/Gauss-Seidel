@@ -472,5 +472,19 @@ namespace Gauss_Seidel_Serial.Test
         }
 
         #endregion
+
+        #region Tests for generateDDMatrix
+
+        [Test]
+        public void generateDDMatrix_100x100Matrix100Times_ReturnsADDMatrix()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                Matrix m = Matrix.generateDDMatrix(100);
+                Assert.AreEqual(true, m.isDiagonallyDominant());
+            }
+        }
+
+        #endregion
     }
 }

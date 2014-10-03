@@ -542,5 +542,25 @@ namespace Gauss_Seidel_Serial
             // well done
             return A;
         }
+
+        // generate a diagonally dominant matrix
+        public static Matrix generateDDMatrix(int size)
+        {
+            // generate a random n x n matrix
+            Matrix A = Matrix.random(size, size, -10, 10);
+
+            // modify diagonal line to make it dominant
+            for (int i = 0; i < A.dim1; i++)
+            {
+                Double sumOfNonDiagonalEntriesInRow = 0;
+                for (int j = 0; j < A.dim2; j++)
+                    if (j != i)
+                        sumOfNonDiagonalEntriesInRow += Math.Abs(A[i, j]);
+                if (Math.Abs(A[i, i]) < sumOfNonDiagonalEntriesInRow)
+                    A[i, i] = sumOfNonDiagonalEntriesInRow + _r.Next(1, 10);
+            }
+
+            return A;
+        }
     }
 }
