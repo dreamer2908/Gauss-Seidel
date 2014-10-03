@@ -201,12 +201,22 @@ namespace Gauss_Seidel_Serial
             return Multiply(m1, scalar);
         }
 
+        public static Matrix operator *(Double scalar, Matrix m1)
+        {
+            return Multiply(m1, scalar);
+        }
+
         public static Matrix operator /(Matrix m1, Matrix m2)
         {
             return Divide(m1, m2);
         }
 
         public static Matrix operator /(Matrix m1, Double scalar)
+        {
+            return Divide(m1, scalar);
+        }
+
+        public static Matrix operator /(Double scalar, Matrix m1)
         {
             return Divide(m1, scalar);
         }
