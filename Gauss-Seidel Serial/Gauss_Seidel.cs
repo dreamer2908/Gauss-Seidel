@@ -53,5 +53,14 @@ namespace Gauss_Seidel_Serial
             solve(A, b, out x, out loops);
             return x;
         }
+
+        public static Boolean convergence(Matrix A)
+        {
+            //The convergence properties of the Gauss-Seidel method are dependent on the matrix A. Namely, the procedure is known to converge if either:
+            //  A is symmetric positive-definite,[4] or
+            //  A is strictly or irreducibly diagonally dominant.
+            //The Gauss–Seidel method sometimes converges even if these conditions are not satisfied.
+            return A.isDiagonallyDominant() || A.isPositiveDefinite();
+        }
     }
 }
