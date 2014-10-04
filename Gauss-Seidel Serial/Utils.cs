@@ -11,6 +11,11 @@ namespace Gauss_Seidel_Serial
         {
             // split input into lines. All empty lines are removed
             string[] inputArray = input.Split(new char[] {'\n', '\r'},  StringSplitOptions.RemoveEmptyEntries);
+            return parseInput(inputArray, out A, out b, out sol);
+        }
+
+        public static bool parseInput(string[] inputArray, out Matrix A, out Matrix b, out Matrix sol)
+        {
             // assume its format is correct FOR NOW
             int offset = 0; // loop later
             int size = 0;
