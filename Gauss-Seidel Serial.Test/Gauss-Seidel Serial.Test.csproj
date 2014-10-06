@@ -63,6 +63,7 @@
     <Compile Include="..\Gauss-Seidel Serial\Matrix.cs" />
     <Compile Include="..\Gauss-Seidel Serial\Gauss_Seidel.cs" />
     <Compile Include="..\Gauss-Seidel Serial\Utils.cs" />
+    <Compile Include="..\Gauss-Seidel Serial\benchmark.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UtilsTest.cs" />
   </ItemGroup>
