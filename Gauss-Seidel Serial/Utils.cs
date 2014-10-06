@@ -17,14 +17,13 @@ namespace Gauss_Seidel_Serial
         public static bool parseInput(string[] inputArray, out Matrix A, out Matrix b, out Matrix sol)
         {
             // assume its format is correct FOR NOW
-            int offset = 0; // loop later
             int size = 0;
-            if (int.TryParse(inputArray[offset], out size))
+            if (inputArray.Length > 3 && int.TryParse(inputArray[0], out size))
             {
                 A = new Matrix(size, size); // size of A = number of entries on each line
                 for (int i = 0; i < size; i++)
                 {
-                    string line = inputArray[offset + i + 1];
+                    string line = inputArray[i + 1];
                     string[] entries = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                     for (int j = 0; j < size; j++)
                     {
@@ -36,7 +35,7 @@ namespace Gauss_Seidel_Serial
                     }
                 }
                 // now RHS vector
-                string RHSLine = inputArray[offset + size + 1];
+                string RHSLine = inputArray[size + 1];
                 string[] RHSEntries = RHSLine.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 b = new Matrix(size, 1);
                 for (int i = 0; i < size; i++)
@@ -48,24 +47,32 @@ namespace Gauss_Seidel_Serial
                         b[i, 0] = 0;
                 }
                 // now solution vector
-                string solLine = inputArray[offset + size + 2];
-                if (!solLine.StartsWith("--"))
+                if (inputArray.Length > size + 2)
                 {
-                    string[] solEntries = solLine.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    sol = new Matrix(size, 1);
-                    for (int i = 0; i < size; i++)
+                    string solLine = inputArray[size + 2];
+                    if (!solLine.StartsWith("--"))
                     {
-                        Double number;
-                        if (Double.TryParse(solEntries[i], out number))
-                            sol[i, 0] = number;
-                        else
-                            sol[i, 0] = 0;
+                        string[] solEntries = solLine.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        sol = new Matrix(size, 1);
+                        for (int i = 0; i < size; i++)
+                        {
+                            Double number;
+                            if (Double.TryParse(solEntries[i], out number))
+                                sol[i, 0] = number;
+                            else
+                                sol[i, 0] = 0;
+                        }
+                    }
+                    else
+                    {
+                        sol = null;
                     }
                 }
                 else
                 {
                     sol = null;
                 }
+                
                 return true;
             }
             else
@@ -74,6 +81,41 @@ namespace Gauss_Seidel_Serial
                 b = null;
                 sol = null;
                 return false;
+            }
+        }
+
+        public static void parseInput(string input, out List<Matrix> A, out List<Matrix> b, out List<Matrix> sol)
+        {
+            // split input into lines. All empty lines are removed
+            string[] inputArray = input.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            parseInput(inputArray, out A, out b, out sol);
+        }
+
+        public static void parseInput(string[] inputArray, out List<Matrix> A, out List<Matrix> b, out List<Matrix> sol)
+        {
+            A = new List<Matrix>();
+            b = new List<Matrix>();
+            sol = new List<Matrix>();
+            // split input into different groups (each is supposed to be a system of equations) and parse them separatedly
+            int separatorPos = -1;
+            for (int i = 0; i < inputArray.Length; i++)
+            {
+                if (inputArray[i].StartsWith("--") || i == inputArray.Length - 1)
+                {
+                    if (i - separatorPos - 1 > 2) // at least 2 lines between them
+                    {
+                        string[] _inputArray = new string[i - separatorPos - 1];
+                        Array.Copy(inputArray, separatorPos + 1, _inputArray, 0, i - separatorPos - 1);
+                        Matrix _A, _b, _sol;
+                        //Console.WriteLine();
+                        //Console.WriteLine(string.Join("\n", _inputArray));
+                        parseInput(_inputArray, out _A, out _b, out _sol);
+                        A.Add(_A);
+                        b.Add(_b);
+                        sol.Add(_sol);
+                    }
+                    separatorPos = i;
+                }
             }
         }
     }

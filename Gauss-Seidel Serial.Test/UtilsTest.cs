@@ -10,7 +10,7 @@ namespace Gauss_Seidel_Serial.Test
     class UtilsTest
     {
         [Test]
-        public void parseInput_Sample1_ChecksThem()
+        public void parseInput12_Sample1_ChecksThem()
         {
             string sample = "4\n10 -1 2 0\n-1 11 -1 3\n2 -1 10 -1\n0 3 -1 8\n6 25 -11 15\n1 2 -1 1\n-------------";
             Matrix A, b, sol;
@@ -72,6 +72,30 @@ namespace Gauss_Seidel_Serial.Test
             Assert.AreEqual(_A.ToString(), A.ToString());
             Assert.AreEqual(_b.ToString(), b.ToString());
             Assert.AreEqual(_sol.ToString(), sol.ToString());
+        }
+
+        [Test]
+        public void parseInput34_Sample1_ChecksThem()
+        {
+            string sample = "4\n10 -1 2 0\n-1 11 -1 3\n2 -1 10 -1\n0 3 -1 8\n6 25 -11 15\n1 2 -1 1\n-------------\n";
+            sample += "\n3\n1 3 5\n3 -5 1\n0 5 2\n1 9 3\n-------";
+            sample += "\n2\n2 1\n3 4\n1 6\n4 4\n";
+            List<Matrix> _A = new List<Matrix>(), _b = new List<Matrix>(), _sol = new List<Matrix>();
+            Utils.parseInput(sample, out _A, out _b, out _sol);
+            for (int i = 0; i < _A.Count; i++)
+            {
+                Console.WriteLine("System #" + i.ToString());
+                Matrix A = _A[i], b = _b[i], sol = _sol[i];
+
+                Console.WriteLine("Matrix A:");
+                Console.WriteLine(A.ToString());
+                Console.WriteLine("Matrix b:");
+                Console.WriteLine(b.ToString());
+
+                Console.WriteLine("Matrix sol:");
+                try { Console.WriteLine(sol.ToString()); }
+                catch (Exception) {Console.WriteLine("None.\n"); }
+            }
         }
     }
 }
