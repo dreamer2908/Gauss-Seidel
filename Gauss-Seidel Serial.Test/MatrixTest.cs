@@ -445,7 +445,19 @@ namespace Gauss_Seidel_Serial.Test
             m1[0, 1] = 2;
             m1[1, 0] = 2;
             m1[1, 1] = 1;
+            int passed = 0, failed = 0, total = 0;
             Boolean re = m1.isPositiveDefinite();
+            for (int i = 0; i < 100; i++)
+            {
+                if (m1.isPositiveDefinite())
+                    failed++;
+                else
+                    passed++;
+                total++;
+            }
+            Console.WriteLine("Passed = " + passed.ToString());
+            Console.WriteLine("Failed = " + failed.ToString());
+            Console.WriteLine("Total = " + total.ToString());
             Assert.AreEqual(false, re);
         }
 

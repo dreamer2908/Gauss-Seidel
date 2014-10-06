@@ -543,15 +543,20 @@ namespace Gauss_Seidel_Serial
 
             Boolean re = zTMz[0, 0] > 0;
 
-            // redo the check
-            z = Matrix.random(this.dim1, 1, -10, 10);
-            while (z.isZero())
-                z = Matrix.random(this.dim1, 1, -1, 1);
-            zT = Matrix.Transpose(z);
-            zTMz = zT * this * z;
+            if (re)
+            {
+                // recheck with CholeskyDecompose
+                Matrix L;
+                Boolean worked = Matrix.CholeskyDecompose(this, out L);
+                re = re && worked;
 
-            // it must pass both checks to be considered positive definite
-            re = re && (zTMz[0, 0] > 0);
+                Matrix mul = L * Matrix.Transpose(L);
+                mul.Round(0.00000001);
+                Matrix mul2 = Matrix.Duplicate(this);
+                mul2.Round(0.00000001);
+                worked = (mul.ToString() == mul2.ToString());
+                re = re && worked;
+            }
 
             return re;
         }
