@@ -118,6 +118,11 @@ namespace Gauss_Seidel_Serial
             return true;
         }
 
+        public Boolean isSymmetric()
+        {
+            return (this.ToString() != Matrix.Transpose(this).ToString());
+        }
+
         // calculate the determinant of this matrix. Supports any size
         public Double determinant()
         {
@@ -470,6 +475,52 @@ namespace Gauss_Seidel_Serial
             return String.Format("{0:0.###############}", n);
         }
 
+        public static Boolean CholeskyDecompose(Matrix A, out Matrix L)
+        {
+            // see http://en.wikipedia.org/wiki/Cholesky_decomposition
+
+            L = Matrix.zeroLike(A);
+
+            if (!A.isSquare()) // only square matrix can be symmetric
+            {
+                // Console.WriteLine("only square matrix can be symmetric");
+                return false;
+            }
+            if (A.ToString() != Matrix.Transpose(A).ToString()) // matrix A is symmetric <=> A = AT
+            {
+                // Console.WriteLine("matrix A is symmetric <=> A = AT");
+                return false;
+            }
+            
+            int size = A.Width;
+            for (int i = 0; i < size; i++)
+                for (int j = 0; j < size; j++)
+                {
+                    if (i == j)
+                    {
+                        // calculate a sum or whatever
+                        Double sum = 0;
+                        for (int k = 0; k < j; k++)
+                        {
+                            sum += L[j, k] * L[j, k];
+                        }
+                        L[j, j] = Math.Sqrt(A[j, j] - sum);
+                    }
+                    else if (i > j)
+                    {
+                        // calculate a sum or whatever
+                        Double sum = 0;
+                        for (int k = 0; k < j; k++)
+                        {
+                            sum += L[i, k] * L[j, k];
+                        }
+                        L[i, j] = (1 / L[j, j]) * (A[i, j] - sum);
+                    }
+                }
+
+            return true;
+        }
+
         public Boolean isPositiveDefinite()
         {
             // In linear algebra, a symmetric n × n real matrix M is said to be positive definite if zTMz is positive for every non-zero column vector z of n real numbers. Here zT denotes the transpose of z.
@@ -492,15 +543,20 @@ namespace Gauss_Seidel_Serial
 
             Boolean re = zTMz[0, 0] > 0;
 
-            // redo the check
-            z = Matrix.random(this.dim1, 1, -10, 10);
-            while (z.isZero())
-                z = Matrix.random(this.dim1, 1, -1, 1);
-            zT = Matrix.Transpose(z);
-            zTMz = zT * this * z;
+            if (re)
+            {
+                // recheck with CholeskyDecompose
+                Matrix L;
+                Boolean worked = Matrix.CholeskyDecompose(this, out L);
+                re = re && worked;
 
-            // it must pass both checks to be considered positive definite
-            re = re && (zTMz[0, 0] > 0);
+                Matrix mul = L * Matrix.Transpose(L);
+                mul.Round(0.00000001);
+                Matrix mul2 = Matrix.Duplicate(this);
+                mul2.Round(0.00000001);
+                worked = (mul.ToString() == mul2.ToString());
+                re = re && worked;
+            }
 
             return re;
         }

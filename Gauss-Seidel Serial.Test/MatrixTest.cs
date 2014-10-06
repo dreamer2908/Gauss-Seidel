@@ -445,15 +445,20 @@ namespace Gauss_Seidel_Serial.Test
             m1[0, 1] = 2;
             m1[1, 0] = 2;
             m1[1, 1] = 1;
-            int passed = 0, failed = 0;
-            for (int i = 0; i < 1000; i++)
+			
+            int passed = 0, failed = 0, total = 0;
+            Boolean re = m1.isPositiveDefinite();
+            for (int i = 0; i < 100; i++)
+            {
                 if (m1.isPositiveDefinite())
                     failed++;
                 else
                     passed++;
-            Console.WriteLine("Failed = " + failed.ToString());
+                total++;
+            }
             Console.WriteLine("Passed = " + passed.ToString());
-            Boolean re = m1.isPositiveDefinite();
+            Console.WriteLine("Failed = " + failed.ToString());
+            Console.WriteLine("Total = " + total.ToString());
             Assert.AreEqual(false, re);
         }
 
@@ -491,6 +496,94 @@ namespace Gauss_Seidel_Serial.Test
                 Matrix m = Matrix.generateDDMatrix(100);
                 Assert.AreEqual(true, m.isDiagonallyDominant());
             }
+        }
+
+        #endregion
+
+        #region Tests for CholeskyDecompose
+
+        [Test]
+        public void CholeskyDecompose_SampleInWiki_ChecksIt()
+        {
+            Matrix m1 = new Matrix(3, 3);
+            m1[0, 0] = 4;
+            m1[0, 1] = 12;
+            m1[0, 2] = -16;
+            m1[1, 0] = 12;
+            m1[1, 1] = 37;
+            m1[1, 2] = -43;
+            m1[2, 0] = -16;
+            m1[2, 1] = -43;
+            m1[2, 2] = 98;
+            Console.WriteLine("m1 = ");
+            Console.WriteLine(m1.ToString());
+
+            Matrix L = new Matrix(3, 3);
+            L[0, 0] = 2;
+            L[0, 1] = 0;
+            L[0, 2] = 0;
+            L[1, 0] = 6;
+            L[1, 1] = 1;
+            L[1, 2] = 0;
+            L[2, 0] = -8;
+            L[2, 1] = 5;
+            L[2, 2] = 3;
+            Console.WriteLine("L = ");
+            Console.WriteLine(L.ToString());
+
+            Matrix Lt = Matrix.Transpose(L);
+            Console.WriteLine("Lt = ");
+            Console.WriteLine(Lt.ToString());
+
+            Matrix mul = L * Lt;
+            Console.WriteLine("mul = ");
+            Console.WriteLine(mul.ToString());
+
+            Matrix re;
+            Matrix.CholeskyDecompose(m1, out re);
+            Console.WriteLine("re = ");
+            Console.WriteLine(re.ToString());
+
+            Matrix mul2 = re * Matrix.Transpose(re);
+            Console.WriteLine("mul2 = ");
+            Console.WriteLine(mul2.ToString());
+
+            Assert.AreEqual(L.ToString(), re.ToString());
+        }
+
+        [TestCase(-2, 2, 1, 1, 3, 2, 1, -2, 0, false)]
+        [TestCase(1, 0, 0, 0, 1, 0, 0, 0, 1, true)] // unit matrix
+        [TestCase(2, -1, 0, -1, 2, -1, 0, -1, 2, true)]
+        [TestCase(4, 12, -16, 12, 37, -43, -16, -43, 98, true)]
+        public void CholeskyDecompose_Various3x3Inputs_ChecksThem(int m1_00, int m1_01, int m1_02, int m1_10, int m1_11, int m1_12, int m1_20, int m1_21, int m1_22, Boolean expected)
+        {
+            Matrix m1 = new Matrix(3, 3);
+            m1[0, 0] = m1_00;
+            m1[0, 1] = m1_01;
+            m1[0, 2] = m1_02;
+            m1[1, 0] = m1_10;
+            m1[1, 1] = m1_11;
+            m1[1, 2] = m1_12;
+            m1[2, 0] = m1_20;
+            m1[2, 1] = m1_21;
+            m1[2, 2] = m1_22;
+            Console.WriteLine("m1 = ");
+            Console.WriteLine(m1.ToString());
+
+            Matrix re;
+            Boolean worked = Matrix.CholeskyDecompose(m1, out re);
+            Console.WriteLine("re = ");
+            Console.WriteLine(re.ToString());
+
+            Matrix mul2 = re * Matrix.Transpose(re);
+            Console.WriteLine("mul2 = ");
+            Console.WriteLine(mul2.ToString());
+
+            Assert.AreEqual(expected, worked);
+            if (expected)
+                Assert.AreEqual(m1.ToString(), mul2.ToString());
+            else
+                Assert.AreNotEqual(m1.ToString(), mul2.ToString());
         }
 
         #endregion
