@@ -486,14 +486,24 @@ namespace Gauss_Seidel_Serial.Test
 
         #endregion
 
-        #region Tests for generateDDMatrix
+        #region Tests for generateDiagonallyDominantMatrix
 
         [Test]
-        public void generateDDMatrix_100x100Matrix100Times_ReturnsADDMatrix()
+        public void generateDiagonallyDominantMatrix_100x100Matrix100TimesRound_ReturnsADDMatrix()
         {
             for (int i = 0; i < 100; i++)
             {
-                Matrix m = Matrix.generateDDMatrix(100);
+                Matrix m = Matrix.generateDiagonallyDominantMatrix(100, true, -100, 100);
+                Assert.AreEqual(true, m.isDiagonallyDominant());
+            }
+        }
+
+        [Test]
+        public void generateDDMatrix_100x100Matrix100TimesNotRound_ReturnsADDMatrix()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                Matrix m = Matrix.generateDiagonallyDominantMatrix(100, false, -100, 100);
                 Assert.AreEqual(true, m.isDiagonallyDominant());
             }
         }

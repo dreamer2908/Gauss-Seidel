@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 
-namespace Hill_Cipher.Research
+namespace Gauss_Seidel_Serial
 {
     class benchmark
     {

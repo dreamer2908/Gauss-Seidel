@@ -28,6 +28,7 @@ namespace Gauss_Seidel_Serial
             set { _matrix[x, y] = value; }
         }
 
+        #region unit, zero, random matrix
         static public Matrix unit(int size)
         {
             Matrix re = new Matrix(size, size);
@@ -81,6 +82,11 @@ namespace Gauss_Seidel_Serial
 
         static public Matrix random(int dim1, int dim2, Double _min, Double _max)
         {
+            return random(dim1, dim2, _min, _max, false);
+        }
+
+        static public Matrix random(int dim1, int dim2, Double _min, Double _max, bool round)
+        {
             Matrix re = new Matrix(dim1, dim2);
             re.randomFill();
             // check sanity
@@ -91,9 +97,14 @@ namespace Gauss_Seidel_Serial
             // scale to max - min range
             re *= Math.Abs(max - min);
             re = Matrix.OffsetValue(re, min);
+            // round
+            if (round)
+                re.Round(1);
             return re;
         }
+        #endregion
 
+        #region Matrix properties
         public Boolean isSquare()
         {
             return (this.Height == this.Width);
@@ -170,7 +181,9 @@ namespace Gauss_Seidel_Serial
         {
             return (this.determinant() != 0);
         }
+        #endregion
 
+        #region operators
         public static Boolean operator ==(Matrix m1, Matrix m2)
         {
             return (m1.ToString() == m2.ToString());
@@ -231,7 +244,9 @@ namespace Gauss_Seidel_Serial
         {
             return Matrix.Inverse(m);
         }
+        #endregion
 
+        #region Basic matrix functions
         // Return the sum of m1 and m2. They must be in the same size
         public static Matrix Add(Matrix m1, Matrix m2)
         {
@@ -374,32 +389,9 @@ namespace Gauss_Seidel_Serial
                     re[i, j] = m[i, j];
             return re;
         }
+        #endregion
 
-        // It's to fix stuff like 0.000000000001 or 0.999999999999999
-        // >>>>>>>float
-        public static Matrix Round(Matrix m, Double rouding)
-        {
-            Matrix re = new Matrix(m.Height, m.Width);
-            for (int i = 0; i < re.Height; i++)
-                for (int j = 0; j < re.Width; j++)
-                    re[i, j] = RoundNum(m[i, j], rouding);
-            return re;
-        }
-
-        // result will be rounded to multiple of rounding arg
-        // for example: rounding = 0.05, result will be like 0.05, 0.1, 0.15, 0.2, 0.25, 0.3
-        public void Round(Double rouding)
-        {
-            for (int i = 0; i < this.Height; i++)
-                for (int j = 0; j < this.Width; j++)
-                    this[i, j] = RoundNum(this[i, j], rouding);
-        }
-
-        private static Double RoundNum(Double num, Double rounding)
-        {
-            return Math.Floor(num / rounding + 0.5) * rounding;
-        }
-
+        #region Advanced matrix functions
         // Decompose matrix m into lower triangular matrix L and strict upper triangular matrix U
         public static void Decompose(Matrix m, out Matrix L, out Matrix U)
         {
@@ -446,35 +438,6 @@ namespace Gauss_Seidel_Serial
             return true;
         }
 
-        public override bool Equals(object obj)
-        {
-            return (this.GetHashCode() == obj.GetHashCode());
-        }
-
-        public override int GetHashCode()
-        {
-            return this.ToString().GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            String re = "";
-            for (int i = 0; i < this.Height; i++)
-            {
-                for (int j = 0; j < this.Width; j++)
-                {
-                    re += Format(this[i, j]) + " ";
-                }
-                re += "\n";
-            }
-            return re;
-        }
-
-        private string Format(Double n)
-        {
-            return String.Format("{0:0.###############}", n);
-        }
-
         public static Boolean CholeskyDecompose(Matrix A, out Matrix L)
         {
             // see http://en.wikipedia.org/wiki/Cholesky_decomposition
@@ -491,7 +454,7 @@ namespace Gauss_Seidel_Serial
                 // Console.WriteLine("matrix A is symmetric <=> A = AT");
                 return false;
             }
-            
+
             int size = A.Width;
             for (int i = 0; i < size; i++)
                 for (int j = 0; j < size; j++)
@@ -583,11 +546,11 @@ namespace Gauss_Seidel_Serial
         }
 
         // generate a symmetric positive-definite matrix
-        public static Matrix generateSPDMatrix(int size)
+        public static Matrix generateSymmetricPositiveDefiniteMatrix(int size)
         {
             // Follow Daryl's answer here
             // https://math.stackexchange.com/questions/357980/matlab-code-for-generating-random-symmetric-positive-definite-matrix
-            
+
             // generate a random n x n matrix
             Matrix A = Matrix.random(size, size, -10, 10);
             // construct a symmetric matrix from it
@@ -600,10 +563,12 @@ namespace Gauss_Seidel_Serial
         }
 
         // generate a diagonally dominant matrix
-        public static Matrix generateDDMatrix(int size)
+        public static Matrix generateDiagonallyDominantMatrix(int size, bool round, double min, double max)
         {
             // generate a random n x n matrix
-            Matrix A = Matrix.random(size, size, -10, 10);
+            Matrix A = Matrix.random(size, size, min, max);
+            if (round)
+                A.Round(1);
 
             // modify diagonal line to make it dominant
             for (int i = 0; i < A.dim1; i++)
@@ -618,5 +583,80 @@ namespace Gauss_Seidel_Serial
 
             return A;
         }
+        #endregion
+
+        #region rouding
+        // It's to fix stuff like 0.000000000001 or 0.999999999999999
+        // >>>>>>>float
+        public static Matrix Round(Matrix m, Double rouding)
+        {
+            Matrix re = new Matrix(m.Height, m.Width);
+            for (int i = 0; i < re.Height; i++)
+                for (int j = 0; j < re.Width; j++)
+                    re[i, j] = RoundNum(m[i, j], rouding);
+            return re;
+        }
+
+        // result will be rounded to multiple of rounding arg
+        // for example: rounding = 0.05, result will be like 0.05, 0.1, 0.15, 0.2, 0.25, 0.3
+        public void Round(Double rouding)
+        {
+            for (int i = 0; i < this.Height; i++)
+                for (int j = 0; j < this.Width; j++)
+                    this[i, j] = RoundNum(this[i, j], rouding);
+        }
+
+        private static Double RoundNum(Double num, Double rounding)
+        {
+            return Math.Floor(num / rounding + 0.5) * rounding;
+        }
+        #endregion
+
+        #region overriding methods
+        public override bool Equals(object obj)
+        {
+            return (this.GetHashCode() == obj.GetHashCode());
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            String re = "";
+            for (int i = 0; i < this.Height; i++)
+            {
+                for (int j = 0; j < this.Width; j++)
+                {
+                    re += Format(this[i, j]) + " ";
+                }
+                if (i < this.Height - 1)
+                    re += "\n";
+            }
+            return re;
+        }
+
+        public string ToString(double rouding)
+        {
+            String re = "";
+            for (int i = 0; i < this.Height; i++)
+            {
+                for (int j = 0; j < this.Width; j++)
+                {
+                    re += Format(RoundNum(this[i, j], rouding)) + " ";
+                }
+                if (i < this.Height - 1)
+                    re += "\n";
+            }
+            return re;
+        }
+
+        private string Format(Double n)
+        {
+            return String.Format("{0:0.###############}", n);
+        }
+        #endregion
     }
 }
