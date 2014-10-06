@@ -118,6 +118,11 @@ namespace Gauss_Seidel_Serial
             return true;
         }
 
+        public Boolean isSymmetric()
+        {
+            return (this.ToString() != Matrix.Transpose(this).ToString());
+        }
+
         // calculate the determinant of this matrix. Supports any size
         public Double determinant()
         {
@@ -468,6 +473,52 @@ namespace Gauss_Seidel_Serial
         private string Format(Double n)
         {
             return String.Format("{0:0.###############}", n);
+        }
+
+        public static Boolean CholeskyDecompose(Matrix A, out Matrix L)
+        {
+            // see http://en.wikipedia.org/wiki/Cholesky_decomposition
+
+            L = Matrix.zeroLike(A);
+
+            if (!A.isSquare()) // only square matrix can be symmetric
+            {
+                // Console.WriteLine("only square matrix can be symmetric");
+                return false;
+            }
+            if (A.ToString() != Matrix.Transpose(A).ToString()) // matrix A is symmetric <=> A = AT
+            {
+                // Console.WriteLine("matrix A is symmetric <=> A = AT");
+                return false;
+            }
+            
+            int size = A.Width;
+            for (int i = 0; i < size; i++)
+                for (int j = 0; j < size; j++)
+                {
+                    if (i == j)
+                    {
+                        // calculate a sum or whatever
+                        Double sum = 0;
+                        for (int k = 0; k < j; k++)
+                        {
+                            sum += L[j, k] * L[j, k];
+                        }
+                        L[j, j] = Math.Sqrt(A[j, j] - sum);
+                    }
+                    else if (i > j)
+                    {
+                        // calculate a sum or whatever
+                        Double sum = 0;
+                        for (int k = 0; k < j; k++)
+                        {
+                            sum += L[i, k] * L[j, k];
+                        }
+                        L[i, j] = (1 / L[j, j]) * (A[i, j] - sum);
+                    }
+                }
+
+            return true;
         }
 
         public Boolean isPositiveDefinite()
