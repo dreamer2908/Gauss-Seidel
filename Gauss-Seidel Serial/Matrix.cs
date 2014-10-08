@@ -331,7 +331,7 @@ namespace Gauss_Seidel_Serial
                 throw e;
             }
 
-            Double det = Determinant(m);// m.determinant();
+            Double det = m.determinant();
             if (det == 0) // not inversible 
             {
                 // still return for the sake of simplicity
@@ -356,7 +356,7 @@ namespace Gauss_Seidel_Serial
                             minorMatrix[x, y] = m[r, c];
                         }
                     }
-                    Double minorDet = Determinant(minorMatrix);
+                    Double minorDet = minorMatrix.determinant();
                     re[i, j] = (int)Math.Pow(-1, i + j) * minorDet;
                 }
             return re / det;
