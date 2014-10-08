@@ -10,10 +10,10 @@ namespace Gauss_Seidel_Serial
     {
         static void Main(string[] args)
         {
-            // string[] args = "-o output.txt -b 8 -t 10".Split(new char[] { ' ' });
+            // string[] argss = "-o output.txt -b 200 -t 10".Split(new char[] { ' ' });
             // parse args
             string inputFile = "", outputFile = "";
-            bool benchmarkMode = false;
+            bool benchmarkMode = false, showEquation = false;
             int benchmarkSize = 3;
             int benchmarkTime = 1;
             int i = 0;
@@ -27,6 +27,7 @@ namespace Gauss_Seidel_Serial
                     {
                         case "i": if (i + 1 < args.Length) inputFile = args[i + 1]; break;
                         case "o": if (i + 1 < args.Length) outputFile = args[i + 1]; break;
+                        case "s": showEquation = true; break;
                         case "b": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
                         case "t": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
                     }
@@ -38,6 +39,7 @@ namespace Gauss_Seidel_Serial
                     {
                         case "input": if (i + 1 < args.Length) inputFile = args[i + 1]; break;
                         case "output": if (i + 1 < args.Length) outputFile = args[i + 1]; break;
+                        case "show-equation": showEquation = true; break;
                         case "benchmark": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
                         case "times": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
                     }
@@ -100,9 +102,13 @@ namespace Gauss_Seidel_Serial
                 Matrix x = xs[j], err = errs[j];
                 int loops = loopses[j];
                 bool converge = converges[j];
-                string strResult = "\nEquation:\n" + writeEquation(As[j], bs[j]);
-                strResult += "\nSolution: " + Matrix.Transpose(x).ToString(0.000000001);
-                strResult += "\nError: " + Matrix.Transpose(err).ToString(0.000000001);
+                string strResult = "";
+                if (showEquation)
+                    strResult += "\nEquation:\n" + writeEquation(As[j], bs[j]);
+                strResult += "\nNo. equations: " + x.Height.ToString();
+                strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-16);
+                strResult += "\nError: " + Matrix.Transpose(err).ToString(1e-16);
+                strResult += "\nAvg error: " + string.Format("{0:0.################}", err.avgValue());
                 strResult += "\nConverged: " + converge.ToString();
                 strResult += "\nLoops: " + loops.ToString();
                 writeOutput(outputFile, strResult);
