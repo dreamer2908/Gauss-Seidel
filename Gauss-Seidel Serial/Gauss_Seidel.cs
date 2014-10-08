@@ -7,8 +7,8 @@ namespace Gauss_Seidel_Serial
 {
     class Gauss_Seidel
     {
-        // return true if it converges. Output: solution matrix, loops it took
-       public static Boolean solve(Matrix A, Matrix b, out Matrix x, out int loops)
+        // return true if it converges. Output: solution matrix, errors, loops it took
+       public static Boolean solve(Matrix A, Matrix b, out Matrix x, out Matrix err, out int loops)
         {
             // check sanity
             if (!A.isSquare() || !b.isColumn() || (A.Height != b.Height))
@@ -42,7 +42,16 @@ namespace Gauss_Seidel_Serial
                 x = new_x;
             }
 
+            err = A * x - b;
+
             return converge;
+        }
+
+        // if u don't care about error
+        public static Boolean solve(Matrix A, Matrix b, out Matrix x, out int loops)
+        {
+            Matrix err;
+            return solve(A, b, out x, out err, out loops);
         }
 
         // just use this when u don't care about convergence and loop
