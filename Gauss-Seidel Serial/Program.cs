@@ -74,6 +74,7 @@ namespace Gauss_Seidel_Serial
             // do the calculation
             List<bool> converges = new List<bool>();
             List<int> loopses = new List<int>();
+            List<Matrix> errs = new List<Matrix>();
 
             int equCounts = As.Count;
             benchmark bm = new benchmark();
@@ -83,23 +84,25 @@ namespace Gauss_Seidel_Serial
             for (int j = 0; j < equCounts; j++)
             {
                 Console.WriteLine("Solving system equation #" + (j + 1).ToString());
-                Matrix x;
+                Matrix x , err;
                 int loops = 0;
-                bool converge = Gauss_Seidel.solve(As[j], bs[j], out x, out loops);
+                bool converge = Gauss_Seidel.solve(As[j], bs[j], out x, out err, out loops);
                 xs.Add(x);
                 loopses.Add(loops);
                 converges.Add(converge);
+                errs.Add(err);
             }
             bmResult = bm.getBenchmarkResult();
 
             // write output
             for (int j = 0; j < equCounts; j++)
             {
-                Matrix x = xs[j];
+                Matrix x = xs[j], err = errs[j];
                 int loops = loopses[j];
                 bool converge = converges[j];
                 string strResult = "\nEquation:\n" + writeEquation(As[j], bs[j]);
                 strResult += "\nSolution: " + Matrix.Transpose(x).ToString(0.000000001);
+                strResult += "\nError: " + Matrix.Transpose(err).ToString(0.000000001);
                 strResult += "\nConverged: " + converge.ToString();
                 strResult += "\nLoops: " + loops.ToString();
                 writeOutput(outputFile, strResult);
