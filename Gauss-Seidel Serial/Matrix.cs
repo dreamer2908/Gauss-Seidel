@@ -652,6 +652,56 @@ namespace Gauss_Seidel_Serial
             return result;
         }
 
+        private static double[] HelperSolve(Matrix luMatrix, double[] b)
+        {
+            // solve luMatrix * x = b
+            int n = luMatrix.dim1;
+            double[] x = new double[n];
+            b.CopyTo(x, 0);
+            for (int i = 1; i < n; ++i)
+            {
+                double sum = x[i];
+                for (int j = 0; j < i; ++j)
+                    sum -= luMatrix[i, j] * x[j];
+                x[i] = sum;
+            }
+            x[n - 1] /= luMatrix[n - 1, n - 1];
+            for (int i = n - 2; i >= 0; --i)
+            {
+                double sum = x[i];
+                for (int j = i + 1; j < n; ++j)
+                    sum -= luMatrix[i, j] * x[j];
+                x[i] = sum / luMatrix[i, i];
+            }
+            return x;
+        }
+
+        public static Matrix InverseAlt(Matrix matrix)
+        {
+            int n = matrix.dim1;
+            Matrix result = Matrix.Duplicate(matrix);
+            int[] perm;
+            int toggle;
+            Matrix lum = LUPDecompose(matrix, out perm, out toggle);
+            if (lum == null)
+                throw new Exception("Unable to compute inverse");
+            double[] b = new double[n];
+            for (int i = 0; i < n; ++i)
+            {
+                for (int j = 0; j < n; ++j)
+                {
+                    if (i == perm[j])
+                        b[j] = 1.0;
+                    else
+                        b[j] = 0.0;
+                }
+                double[] x = HelperSolve(lum, b);
+                for (int j = 0; j < n; ++j)
+                    result[j, i] = x[j];
+            }
+            return result;
+        }
+
         #endregion
 
         #region rouding
