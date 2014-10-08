@@ -684,7 +684,7 @@ namespace Gauss_Seidel_Serial
                 throw e;
             }
 
-            Double det = matrix.determinant();
+            Double det = Determinant(matrix);
             if (det == 0) // not inversible
             {
                 // still return for the sake of simplicity
