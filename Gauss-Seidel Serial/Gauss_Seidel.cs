@@ -22,7 +22,10 @@ namespace Gauss_Seidel_Serial
             // decompose A into the sum of a lower triangular component L* and a strict upper triangular component U
             Matrix L, U;
             Matrix.Decompose(A, out L, out U);
+            //benchmark bm = new benchmark();
+            //bm.startBenchmark();
             Matrix L_1 = ~L; // inverse of L*
+            //Console.WriteLine("Matrix inversion took " + bm.getBenchmarkResult());
 
             // x (at step k+1) = T * x (at step k) + C
             // where T = - (inverse of L*) * U and C = (inverse of L*) * b
@@ -34,6 +37,7 @@ namespace Gauss_Seidel_Serial
             loops = 0;
             Boolean converge = false;
             int ITERATION_LIMIT = 1000; // if it still doesn't converge after this many loops, assume it won't converge and give up
+            //bm.startBenchmark();
             for (; loops < ITERATION_LIMIT; loops++)
             {
                 new_x = T * x + C;
@@ -41,7 +45,7 @@ namespace Gauss_Seidel_Serial
                     break;
                 x = new_x;
             }
-
+            //Console.WriteLine("Iteration took " + bm.getBenchmarkResult());
             err = A * x - b;
 
             return converge;
