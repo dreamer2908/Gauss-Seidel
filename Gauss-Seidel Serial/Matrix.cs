@@ -662,6 +662,13 @@ namespace Gauss_Seidel_Serial
             Matrix lum = LUPDecompose(matrix, out perm, out toggle);
             if (lum == null)
                 return 0; // throw new Exception("Unable to compute MatrixDeterminant");
+            return Determinant(lum, perm, toggle);
+        }
+
+        public static double Determinant(Matrix lum, int[] perm, int toggle)
+        {
+            if (lum == null)
+                return 0;
             double result = toggle;
             for (int i = 0; i < lum.Width; ++i)
                 result *= lum[i, i];
@@ -700,7 +707,15 @@ namespace Gauss_Seidel_Serial
                 throw e;
             }
 
-            Double det = Determinant(matrix);
+            int n = matrix.dim1;
+            Matrix result = Matrix.Duplicate(matrix);
+            int[] perm;
+            int toggle;
+            Matrix lum = LUPDecompose(matrix, out perm, out toggle);
+            if (lum == null)
+                return Matrix.zeroLike(matrix); //throw new Exception("Unable to compute inverse");
+
+            Double det = Determinant(lum, perm, toggle);
             if (det == 0) // not inversible
             {
                 // still return for the sake of simplicity
@@ -709,13 +724,6 @@ namespace Gauss_Seidel_Serial
                 return Matrix.zeroLike(matrix);
             }
 
-            int n = matrix.dim1;
-            Matrix result = Matrix.Duplicate(matrix);
-            int[] perm;
-            int toggle;
-            Matrix lum = LUPDecompose(matrix, out perm, out toggle);
-            if (lum == null)
-                throw new Exception("Unable to compute inverse");
             double[] b = new double[n];
             for (int i = 0; i < n; ++i)
             {
