@@ -121,7 +121,7 @@ namespace Gauss_Seidel_Serial.Test
             Matrix re = ~m1;
             Matrix product = m1 * re;
             product.Round(0.001);
-            if (m1.invertible())
+            if (m1.invertible)
             {
                 Assert.AreEqual(product.ToString(), unitM.ToString());
             }
@@ -155,7 +155,7 @@ namespace Gauss_Seidel_Serial.Test
             Matrix zeroM = Matrix.zero(3);
             Matrix product = m1 * re;
             product.Round(0.001);
-            if (m1.invertible())
+            if (m1.invertible)
             {
                 Assert.AreEqual(product.ToString(), unitM.ToString());
             }
@@ -193,7 +193,7 @@ namespace Gauss_Seidel_Serial.Test
             Matrix zeroM = Matrix.zero(4);
             Matrix product = m1 * re;
             product.Round(0.001);
-            if (m1.invertible())
+            if (m1.invertible)
             {
                 Assert.AreEqual(product.ToString(), unitM.ToString());
             }
@@ -408,7 +408,7 @@ namespace Gauss_Seidel_Serial.Test
         public void isPositiveDefinite_unitMatrix_returnsTrue()
         {
             Matrix unit = Matrix.unit(10);
-            Boolean re = unit.isPositiveDefinite();
+            Boolean re = unit.isPositiveDefinite;
             Assert.AreEqual(true, re);
         }
 
@@ -416,7 +416,7 @@ namespace Gauss_Seidel_Serial.Test
         public void isPositiveDefinite_zeroMatrix_returnsFalse()
         {
             Matrix zero = Matrix.zero(10);
-            Boolean re = zero.isPositiveDefinite();
+            Boolean re = zero.isPositiveDefinite;
             Assert.AreEqual(false, re);
         }
 
@@ -433,7 +433,7 @@ namespace Gauss_Seidel_Serial.Test
             m1[2, 0] = 0;
             m1[2, 1] = -1;
             m1[2, 2] = 2;
-            Boolean re = m1.isPositiveDefinite();
+            Boolean re = m1.isPositiveDefinite;
             Assert.AreEqual(true, re);
         }
 
@@ -447,10 +447,10 @@ namespace Gauss_Seidel_Serial.Test
             m1[1, 1] = 1;
 			
             int passed = 0, failed = 0, total = 0;
-            Boolean re = m1.isPositiveDefinite();
+            Boolean re = m1.isPositiveDefinite;
             for (int i = 0; i < 100; i++)
             {
-                if (m1.isPositiveDefinite())
+                if (m1.isPositiveDefinite)
                     failed++;
                 else
                     passed++;
@@ -481,7 +481,7 @@ namespace Gauss_Seidel_Serial.Test
             m1[2, 0] = m1_20;
             m1[2, 1] = m1_21;
             m1[2, 2] = m1_22;
-            Assert.AreEqual(expected, m1.isDiagonallyDominant());
+            Assert.AreEqual(expected, m1.isDiagonallyDominant);
         }
 
         #endregion
@@ -494,7 +494,7 @@ namespace Gauss_Seidel_Serial.Test
             for (int i = 0; i < 100; i++)
             {
                 Matrix m = Matrix.generateDiagonallyDominantMatrix(100, true, -100, 100);
-                Assert.AreEqual(true, m.isDiagonallyDominant());
+                Assert.AreEqual(true, m.isDiagonallyDominant);
             }
         }
 
@@ -504,7 +504,7 @@ namespace Gauss_Seidel_Serial.Test
             for (int i = 0; i < 100; i++)
             {
                 Matrix m = Matrix.generateDiagonallyDominantMatrix(100, false, -100, 100);
-                Assert.AreEqual(true, m.isDiagonallyDominant());
+                Assert.AreEqual(true, m.isDiagonallyDominant);
             }
         }
 

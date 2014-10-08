@@ -11,7 +11,7 @@ namespace Gauss_Seidel_Serial
        public static Boolean solve(Matrix A, Matrix b, out Matrix x, out Matrix err, out int loops)
         {
             // check sanity
-            if (!A.isSquare() || !b.isColumn() || (A.Height != b.Height))
+            if (!A.isSquare || !b.isColumn || (A.Height != b.Height))
             {
                 Exception e = new Exception("Matrix A must be square! Matrix b must be a column matrix with the same height as matrix A!");
                 throw e;
@@ -67,13 +67,14 @@ namespace Gauss_Seidel_Serial
             return x;
         }
 
+        // Check if equations stored in matrix A should converge. Might still do sometimes even when this return false
         public static Boolean convergence(Matrix A)
         {
             //The convergence properties of the Gauss-Seidel method are dependent on the matrix A. Namely, the procedure is known to converge if either:
             //  A is symmetric positive-definite,[4] or
             //  A is strictly or irreducibly diagonally dominant.
             //The Gauss–Seidel method sometimes converges even if these conditions are not satisfied.
-            return A.isDiagonallyDominant() || A.isPositiveDefinite();
+            return A.isDiagonallyDominant || A.isPositiveDefinite;
         }
     }
 }

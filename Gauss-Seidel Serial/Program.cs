@@ -108,7 +108,7 @@ namespace Gauss_Seidel_Serial
                 strResult += "\nNo. equations: " + x.Height.ToString();
                 strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-16);
                 strResult += "\nError: " + Matrix.Transpose(err).ToString(1e-16);
-                strResult += "\nAvg error: " + string.Format("{0:0.################}", err.avgValue());
+                strResult += "\nAvg error: " + string.Format("{0:0.################}", err.avgValue);
                 strResult += "\nConverged: " + converge.ToString();
                 strResult += "\nLoops: " + loops.ToString();
                 writeOutput(outputFile, strResult);

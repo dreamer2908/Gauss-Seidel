@@ -14,6 +14,12 @@ namespace Gauss_Seidel_Serial
             _matrix = new Double[dim1, dim2];
         }
 
+        public Double this[int x, int y]
+        {
+            get { return _matrix[x, y]; }
+            set { _matrix[x, y] = value; }
+        }
+
         // Height (dim1) = number of rows, width (dim2) = number of columns
         public int Height { get { return _matrix.GetLength(0); } }
         public int Width { get { return _matrix.GetLength(1); } }
@@ -22,13 +28,7 @@ namespace Gauss_Seidel_Serial
 
         private static Random _r = new Random(); // random number generator had better be static
 
-        public Double this[int x, int y]
-        {
-            get { return _matrix[x, y]; }
-            set { _matrix[x, y] = value; }
-        }
-
-        #region unit, zero, random matrix
+        #region Unit, zero, random matrix
         static public Matrix unit(int size)
         {
             Matrix re = new Matrix(size, size);
@@ -112,94 +112,59 @@ namespace Gauss_Seidel_Serial
         #endregion
 
         #region Matrix properties
-        public Boolean isSquare()
+        public Boolean isSquare
         {
-            return (this.Height == this.Width);
+            get { return (this.Height == this.Width); }
         }
 
-        public Boolean isColumn()
+        public Boolean isColumn
         {
-            return (this.dim2 == 1);
+            get { return (this.dim2 == 1); }
         }
 
-        public Boolean isRow()
+        public Boolean isRow
         {
-            return (this.dim1 == 1);
+            get { return (this.dim1 == 1); }
         }
 
-        public Boolean isZero()
+        public Boolean isZero
         {
-            for (int i = 0; i < this.Height; i++)
-                for (int j = 0; j < this.Width; j++)
-                    if (this[i, j] != 0)
-                        return false;
-            return true;
-        }
-
-        public Boolean isSymmetric()
-        {
-            return (this.ToString() != Matrix.Transpose(this).ToString());
-        }
-
-        // calculate the determinant of this matrix. Supports any size
-        public Double determinant()
-        {
-            if (!this.isSquare())
+            get
             {
-                Exception e = new Exception("Matrix must be square!");
-                throw e;
+                for (int i = 0; i < this.Height; i++)
+                    for (int j = 0; j < this.Width; j++)
+                        if (this[i, j] != 0)
+                            return false;
+                return true;
             }
+        }
 
-            // see https://en.wikipedia.org/wiki/Determinant
-            // and http://ctec.tvu.edu.vn/ttkhai/TCC/63_Dinh_thuc.htm
-            // and http://mathworld.wolfram.com/Determinant.html
-            // Using recursive implemention
-            Double det = 0;
-            int n = this.Height;
-
-            if (n == 1)
-            {
-                return this[0, 0];
-            }
-
-            for (int j = 0; j < n; j++)
-            {
-                // copy everything but row i column j to create minorMatrix
-                Matrix minorMatrix = new Matrix(n - 1, n - 1);
-                for (int x = 0; x < n - 1; x++)
-                {
-                    int r = (x < 1) ? x : x + 1;
-                    for (int y = 0; y < n - 1; y++)
-                    {
-                        int c = (y < j) ? y : y + 1;
-                        minorMatrix[x, y] = this[r, c];
-                    }
-                }
-                Double minorDet = minorMatrix.determinant();
-                Double cofactor = (int)Math.Pow(-1, 1 + j) * minorDet;
-                det = det + cofactor * this[1, j];
-            }
-
-            return det;
+        public Boolean isSymmetric
+        {
+            get { return (this.ToString() != Matrix.Transpose(this).ToString()); }
         }
 
         // check if this matrix can be inversed
-        public Boolean invertible()
+        public Boolean invertible
         {
-            return (Matrix.Determinant(this) != 0);
+            get { return (Matrix.Determinant(this) != 0); }
         }
 
-        public double avgValue()
+        // get average value
+        public double avgValue
         {
-            double val = 0;
-            for (int i = 0; i < this.Height; i++)
-                for (int j = 0; j < this.Width; j++)
-                    val += this[i, j];
-            return val / (this.Height * this.Width);
+            get
+            {
+                double val = 0;
+                for (int i = 0; i < this.Height; i++)
+                    for (int j = 0; j < this.Width; j++)
+                        val += this[i, j];
+                return val / (this.Height * this.Width);
+            }
         }
         #endregion
 
-        #region operators
+        #region Operators
 
         // removed because m == null is a pain
         //public static Boolean operator ==(Matrix m1, Matrix m2)
@@ -328,7 +293,7 @@ namespace Gauss_Seidel_Serial
         // Calculate product of matrix m1 and the inverse matrix of m2.
         public static Matrix Divide(Matrix m1, Matrix m2)
         {
-            if (m1.Width != m2.Height || !m2.isSquare()) // wrong size
+            if (m1.Width != m2.Height || !m2.isSquare) // wrong size
             {
                 Exception e = new Exception("First matrix's width must be equal with second matrix's height AND the second matrix must be square!");
                 throw e;
@@ -337,11 +302,55 @@ namespace Gauss_Seidel_Serial
             return m1 * Matrix.Inverse(m2);
         }
 
+        // calculate the determinant of this matrix. Supports any size
+        // but slow with large matrix (like 9+)
+        public Double determinant()
+        {
+            if (!this.isSquare)
+            {
+                Exception e = new Exception("Matrix must be square!");
+                throw e;
+            }
+
+            // see https://en.wikipedia.org/wiki/Determinant
+            // and http://ctec.tvu.edu.vn/ttkhai/TCC/63_Dinh_thuc.htm
+            // and http://mathworld.wolfram.com/Determinant.html
+            // Using recursive implemention
+            Double det = 0;
+            int n = this.Height;
+
+            if (n == 1)
+            {
+                return this[0, 0];
+            }
+
+            for (int j = 0; j < n; j++)
+            {
+                // copy everything but row i column j to create minorMatrix
+                Matrix minorMatrix = new Matrix(n - 1, n - 1);
+                for (int x = 0; x < n - 1; x++)
+                {
+                    int r = (x < 1) ? x : x + 1;
+                    for (int y = 0; y < n - 1; y++)
+                    {
+                        int c = (y < j) ? y : y + 1;
+                        minorMatrix[x, y] = this[r, c];
+                    }
+                }
+                Double minorDet = minorMatrix.determinant();
+                Double cofactor = (int)Math.Pow(-1, 1 + j) * minorDet;
+                det = det + cofactor * this[1, j];
+            }
+
+            return det;
+        }
+
         // Inverse matrix m. By definition, (inverse of m) * m = unit matrix
+        // slow with large matrix
         public static Matrix Inverse(Matrix m)
         {
             int size = m.Height;
-            if (!m.isSquare())
+            if (!m.isSquare)
             {
                 Exception e = new Exception("Matrix must be square!");
                 throw e;
@@ -426,7 +435,7 @@ namespace Gauss_Seidel_Serial
         public static void Decompose(Matrix m, out Matrix L, out Matrix U)
         {
             int size = m.Height;
-            if (!m.isSquare())
+            if (!m.isSquare)
             {
                 Exception e = new Exception("Matrix must be square!");
                 throw e;
@@ -468,13 +477,14 @@ namespace Gauss_Seidel_Serial
             return true;
         }
 
+        // Decompose matrix into L (and L*) using Cholesky algorithm
         public static Boolean CholeskyDecompose(Matrix A, out Matrix L)
         {
             // see http://en.wikipedia.org/wiki/Cholesky_decomposition
 
             L = Matrix.zeroLike(A);
 
-            if (!A.isSquare()) // only square matrix can be symmetric
+            if (!A.isSquare) // only square matrix can be symmetric
             {
                 // Console.WriteLine("only square matrix can be symmetric");
                 return false;
@@ -514,48 +524,51 @@ namespace Gauss_Seidel_Serial
             return true;
         }
 
-        public Boolean isPositiveDefinite()
+        // check if this matrix is positive definite using definition and CholeskyDecompose
+        public Boolean isPositiveDefinite
         {
             // In linear algebra, a symmetric n × n real matrix M is said to be positive definite if zTMz is positive for every non-zero column vector z of n real numbers. Here zT denotes the transpose of z.
-
-            if (!this.isSquare()) // only square matrix can be symmetric
-                return false;
-            if (this.ToString() != Matrix.Transpose(this).ToString()) // matrix A is symmetric <=> A = AT
-                return false;
-
-            // now check if it's positive definite
-
-            // generate vector z with random number from -1 to 1. make sure z is non-zero
-            Matrix z = Matrix.random(this.dim1, 1, -1, 1);
-            while (z.isZero())
-                z = Matrix.random(this.dim1, 1, -1, 1);
-            Matrix zT = Matrix.Transpose(z);
-
-            // check zTMz
-            Matrix zTMz = zT * this * z; // should be 1x1
-
-            Boolean re = zTMz[0, 0] > 0;
-
-            if (re)
+            get
             {
-                // recheck with CholeskyDecompose
-                Matrix L;
-                Boolean worked = Matrix.CholeskyDecompose(this, out L);
-                re = re && worked;
+                if (!this.isSquare) // only square matrix can be symmetric
+                    return false;
+                if (this.ToString() != Matrix.Transpose(this).ToString()) // matrix A is symmetric <=> A = AT
+                    return false;
 
-                Matrix mul = L * Matrix.Transpose(L);
-                mul.Round(0.00000001);
-                Matrix mul2 = Matrix.Duplicate(this);
-                mul2.Round(0.00000001);
-                worked = (mul.ToString() == mul2.ToString());
-                re = re && worked;
+                // now check if it's positive definite
+
+                // generate vector z with random number from -1 to 1. make sure z is non-zero
+                Matrix z = Matrix.random(this.dim1, 1, -1, 1);
+                while (z.isZero)
+                    z = Matrix.random(this.dim1, 1, -1, 1);
+                Matrix zT = Matrix.Transpose(z);
+
+                // check zTMz
+                Matrix zTMz = zT * this * z; // should be 1x1
+
+                Boolean re = zTMz[0, 0] > 0;
+
+                if (re)
+                {
+                    // recheck with CholeskyDecompose
+                    Matrix L;
+                    Boolean worked = Matrix.CholeskyDecompose(this, out L);
+                    re = re && worked;
+
+                    Matrix mul = L * Matrix.Transpose(L);
+                    mul.Round(0.00000001);
+                    Matrix mul2 = Matrix.Duplicate(this);
+                    mul2.Round(0.00000001);
+                    worked = (mul.ToString() == mul2.ToString());
+                    re = re && worked;
+                }
+
+                return re;
             }
-
-            return re;
         }
 
         // check if this matrix is diagonally dominant
-        public Boolean isDiagonallyDominant()
+        public Boolean isDiagonallyDominant
         {
             // see https://en.wikipedia.org/wiki/Diagonally_dominant_matrix
             // In mathematics, a matrix is said to be diagonally dominant if for every row of the matrix,
@@ -563,16 +576,19 @@ namespace Gauss_Seidel_Serial
             // magnitudes of all the other (non-diagonal) entries in that row.
             // More precisely, the matrix A is diagonally dominant if
             // | A[i,i] | >= sum(j!=i) of | A[i,j] |
-            for (int i = 0; i < this.dim1; i++)
+            get
             {
-                Double sumOfNonDiagonalEntriesInRow = 0;
-                for (int j = 0; j < this.dim2; j++)
-                    if (j != i)
-                        sumOfNonDiagonalEntriesInRow += Math.Abs(this[i, j]);
-                if (Math.Abs(this[i, i]) < sumOfNonDiagonalEntriesInRow)
-                    return false;
+                for (int i = 0; i < this.dim1; i++)
+                {
+                    Double sumOfNonDiagonalEntriesInRow = 0;
+                    for (int j = 0; j < this.dim2; j++)
+                        if (j != i)
+                            sumOfNonDiagonalEntriesInRow += Math.Abs(this[i, j]);
+                    if (Math.Abs(this[i, i]) < sumOfNonDiagonalEntriesInRow)
+                        return false;
+                }
+                return true;
             }
-            return true;
         }
 
         // generate a symmetric positive-definite matrix
@@ -701,7 +717,7 @@ namespace Gauss_Seidel_Serial
 
         public static Matrix InverseAlt(Matrix matrix)
         {
-            if (!matrix.isSquare())
+            if (!matrix.isSquare)
             {
                 Exception e = new Exception("Matrix must be square!");
                 throw e;
@@ -743,7 +759,7 @@ namespace Gauss_Seidel_Serial
 
         #endregion
 
-        #region rouding
+        #region Rouding
         // It's to fix stuff like 0.000000000001 or 0.999999999999999
         // >>>>>>>float
         public static Matrix Round(Matrix m, Double rouding)
@@ -770,7 +786,7 @@ namespace Gauss_Seidel_Serial
         }
         #endregion
 
-        #region overriding methods
+        #region Overriding methods
         public override bool Equals(object obj)
         {
             return (this.GetHashCode() == obj.GetHashCode());
