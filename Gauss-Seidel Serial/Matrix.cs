@@ -179,7 +179,7 @@ namespace Gauss_Seidel_Serial
         // check if this matrix can be inversed
         public Boolean inversible()
         {
-            return (this.determinant() != 0);
+            return (Matrix.Determinant(this) != 0);
         }
         #endregion
 
