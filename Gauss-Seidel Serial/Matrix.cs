@@ -328,15 +328,15 @@ namespace Gauss_Seidel_Serial
                 Exception e = new Exception("Matrix must be square!");
                 throw e;
             }
-            if (m.determinant() == 0) // not inversible 
+
+            Double det = Determinant(m);// m.determinant();
+            if (det == 0) // not inversible 
             {
                 // still return for the sake of simplicity
                 // Zero matrix * any matrix = zero matrix
                 // so it's never a valid answer
                 return Matrix.zero(size);
             }
-
-            Double det = m.determinant();
 
             Matrix re = new Matrix(size, size);
             for (int i = 0; i < size; i++)
@@ -354,7 +354,7 @@ namespace Gauss_Seidel_Serial
                             minorMatrix[x, y] = m[r, c];
                         }
                     }
-                    Double minorDet = minorMatrix.determinant();
+                    Double minorDet = Determinant(minorMatrix);
                     re[i, j] = (int)Math.Pow(-1, i + j) * minorDet;
                 }
             return re / det;
@@ -389,6 +389,18 @@ namespace Gauss_Seidel_Serial
                     re[i, j] = m[i, j];
             return re;
         }
+
+        // swap row #r1 and #r2
+        public void swapRows(int r1, int r2)
+        {
+            for (int j = 0; j < this.dim2; j++)
+            {
+                Double tmp = this[r1, j];
+                this[r1, j] = this[r2, j];
+                this[r2, j] = tmp;
+            }
+        }
+
         #endregion
 
         #region Advanced matrix functions
@@ -583,6 +595,61 @@ namespace Gauss_Seidel_Serial
 
             return A;
         }
+
+        // Doolittle LUP decomposition.
+        public static Matrix LUPDecompose(Matrix matrix, out int[] perm, out int toggle)
+        {
+            // assumes matrix is square.
+            int n = matrix.Width; // convenience
+            Matrix result = Matrix.Duplicate(matrix);
+            perm = new int[n];
+            for (int i = 0; i < n; ++i) { perm[i] = i; }
+            toggle = 1;
+            for (int j = 0; j < n - 1; ++j) // each column
+            {
+                double colMax = Math.Abs(result[j, j]); // largest val in col j
+                int pRow = j;
+                for (int i = j + 1; i < n; ++i)
+                {
+                    if (result[i, j] > colMax)
+                    {
+                        colMax = result[i, j];
+                        pRow = i;
+                    }
+                }
+                if (pRow != j) // swap rows
+                {
+                    result.swapRows(pRow, j);
+                    int tmp = perm[pRow]; // and swap perm info
+                    perm[pRow] = perm[j];
+                    perm[j] = tmp;
+                    toggle = -toggle; // row-swap toggle
+                }
+                if (Math.Abs(result[j, j]) < 1.0E-20)
+                    return null; // consider a throw
+                for (int i = j + 1; i < n; ++i)
+                {
+                    result[i, j] /= result[j, j];
+                    for (int k = j + 1; k < n; ++k)
+                        result[i, k] -= result[i, j] * result[j, k];
+                }
+            } // main j column loop
+            return result;
+        }
+
+        public static double Determinant(Matrix matrix)
+        {
+            int[] perm;
+            int toggle;
+            Matrix lum = LUPDecompose(matrix, out perm, out toggle);
+            if (lum == null)
+                return 0; // throw new Exception("Unable to compute MatrixDeterminant");
+            double result = toggle;
+            for (int i = 0; i < lum.Width; ++i)
+                result *= lum[i, i];
+            return result;
+        }
+
         #endregion
 
         #region rouding
