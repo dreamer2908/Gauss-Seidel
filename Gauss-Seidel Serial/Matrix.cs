@@ -80,6 +80,13 @@ namespace Gauss_Seidel_Serial
                     this[x, y] = _r.NextDouble();
         }
 
+        public void numFill(int n)
+        {
+            for (int x = 0; x < dim1; x++)
+                for (int y = 0; y < dim2; y++)
+                    this[x, y] = n;
+        }
+
         static public Matrix random(int dim1, int dim2, Double _min, Double _max)
         {
             return random(dim1, dim2, _min, _max, false);
@@ -180,6 +187,15 @@ namespace Gauss_Seidel_Serial
         public Boolean inversible()
         {
             return (Matrix.Determinant(this) != 0);
+        }
+
+        public double avgValue()
+        {
+            double val = 0;
+            for (int i = 0; i < this.Height; i++)
+                for (int j = 0; j < this.Width; j++)
+                    val += this[i, j];
+            return val / (this.Height * this.Width);
         }
         #endregion
 
