@@ -184,15 +184,17 @@ namespace Gauss_Seidel_Serial
         #endregion
 
         #region operators
-        public static Boolean operator ==(Matrix m1, Matrix m2)
-        {
-            return (m1.ToString() == m2.ToString());
-        }
 
-        public static Boolean operator !=(Matrix m1, Matrix m2)
-        {
-            return (m1.ToString() != m2.ToString());
-        }
+        // removed because m == null is a pain
+        //public static Boolean operator ==(Matrix m1, Matrix m2)
+        //{
+        //    return (m1.ToString() == m2.ToString());
+        //}
+
+        //public static Boolean operator !=(Matrix m1, Matrix m2)
+        //{
+        //    return (m1.ToString() != m2.ToString());
+        //}
 
         public static Matrix operator +(Matrix m1, Matrix m2)
         {
