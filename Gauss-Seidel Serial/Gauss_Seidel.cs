@@ -37,7 +37,7 @@ namespace Gauss_Seidel_Serial
             for (; loops < ITERATION_LIMIT; loops++)
             {
                 new_x = T * x + C;
-                if (converge = Matrix.AllClose(new_x, x, 1e-8)) // converge
+                if (converge = Matrix.AllClose(new_x, x, 1e-16)) // converge
                     break;
                 x = new_x;
             }
