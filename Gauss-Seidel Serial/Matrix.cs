@@ -244,7 +244,7 @@ namespace Gauss_Seidel_Serial
         // Get the inverse matrix of m
         public static Matrix operator ~(Matrix m)
         {
-            return Matrix.Inverse(m);
+            return Matrix.InverseAlt(m);
         }
         #endregion
 
@@ -678,6 +678,21 @@ namespace Gauss_Seidel_Serial
 
         public static Matrix InverseAlt(Matrix matrix)
         {
+            if (!matrix.isSquare())
+            {
+                Exception e = new Exception("Matrix must be square!");
+                throw e;
+            }
+
+            Double det = matrix.determinant();
+            if (det == 0) // not inversible
+            {
+                // still return for the sake of simplicity
+                // Zero matrix * any matrix = zero matrix
+                // so it's never a valid answer
+                return Matrix.zeroLike(matrix);
+            }
+
             int n = matrix.dim1;
             Matrix result = Matrix.Duplicate(matrix);
             int[] perm;
