@@ -184,7 +184,7 @@ namespace Gauss_Seidel_Serial
         }
 
         // check if this matrix can be inversed
-        public Boolean inversible()
+        public Boolean invertible()
         {
             return (Matrix.Determinant(this) != 0);
         }
@@ -348,7 +348,7 @@ namespace Gauss_Seidel_Serial
             }
 
             Double det = m.determinant();
-            if (det == 0) // not inversible 
+            if (det == 0) // not invertible
             {
                 // still return for the sake of simplicity
                 // Zero matrix * any matrix = zero matrix
@@ -716,7 +716,7 @@ namespace Gauss_Seidel_Serial
                 return Matrix.zeroLike(matrix); //throw new Exception("Unable to compute inverse");
 
             Double det = Determinant(lum, perm, toggle);
-            if (det == 0) // not inversible
+            if (det == 0) // not invertible
             {
                 // still return for the sake of simplicity
                 // Zero matrix * any matrix = zero matrix

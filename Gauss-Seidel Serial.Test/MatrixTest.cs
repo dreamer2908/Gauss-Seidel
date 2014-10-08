@@ -121,11 +121,11 @@ namespace Gauss_Seidel_Serial.Test
             Matrix re = ~m1;
             Matrix product = m1 * re;
             product.Round(0.001);
-            if (m1.inversible())
+            if (m1.invertible())
             {
                 Assert.AreEqual(product.ToString(), unitM.ToString());
             }
-            else // return zero matrix if it's not inversible
+            else // return zero matrix if it's not invertible
             {
                 Assert.AreEqual(re.ToString(), zeroM.ToString());
             }
@@ -155,11 +155,11 @@ namespace Gauss_Seidel_Serial.Test
             Matrix zeroM = Matrix.zero(3);
             Matrix product = m1 * re;
             product.Round(0.001);
-            if (m1.inversible())
+            if (m1.invertible())
             {
                 Assert.AreEqual(product.ToString(), unitM.ToString());
             }
-            else // return zero matrix if it's not inversible
+            else // return zero matrix if it's not invertible
             {
                 Assert.AreEqual(re.ToString(), zeroM.ToString());
             }
@@ -193,11 +193,11 @@ namespace Gauss_Seidel_Serial.Test
             Matrix zeroM = Matrix.zero(4);
             Matrix product = m1 * re;
             product.Round(0.001);
-            if (m1.inversible())
+            if (m1.invertible())
             {
                 Assert.AreEqual(product.ToString(), unitM.ToString());
             }
-            else // return zero matrix if it's not inversible
+            else // return zero matrix if it's not invertible
             {
                 Assert.AreEqual(re.ToString(), zeroM.ToString());
             }
