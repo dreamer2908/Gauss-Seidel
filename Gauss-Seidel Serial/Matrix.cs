@@ -758,6 +758,16 @@ namespace Gauss_Seidel_Serial
 
         public static double Determinant(Matrix matrix)
         {
+            if (!matrix.isSquare)
+            {
+                Exception e = new Exception("Matrix must be square!");
+                throw e;
+            }
+            int size = matrix.Height;
+            if (size == 1)
+                return matrix[0, 0];
+            else if (size == 2)
+                return matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0];
             int[] perm;
             int toggle;
             Matrix lum = LUPDecompose(matrix, out perm, out toggle);
