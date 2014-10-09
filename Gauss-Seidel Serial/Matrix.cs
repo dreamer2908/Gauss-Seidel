@@ -884,32 +884,32 @@ namespace Gauss_Seidel_Serial
 
         public override string ToString()
         {
-            String re = "";
+            StringBuilder re = new StringBuilder();
             for (int i = 0; i < this.Height; i++)
             {
                 for (int j = 0; j < this.Width; j++)
                 {
-                    re += Format(this[i, j]) + " ";
+                    re.Append(Format(this[i, j]) + " ");
                 }
                 if (i < this.Height - 1)
-                    re += "\n";
+                    re.Append("\n");
             }
-            return re;
+            return re.ToString();
         }
 
         public string ToString(double rouding)
         {
-            String re = "";
+            StringBuilder re = new StringBuilder();
             for (int i = 0; i < this.Height; i++)
             {
                 for (int j = 0; j < this.Width; j++)
                 {
-                    re += Format(RoundNum(this[i, j], rouding)) + " ";
+                    re.Append(Format(RoundNum(this[i, j], rouding)) + " ");
                 }
                 if (i < this.Height - 1)
-                    re += "\n";
+                    re.Append("\n");
             }
-            return re;
+            return re.ToString();
         }
 
         private string Format(Double n)
