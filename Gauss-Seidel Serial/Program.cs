@@ -150,7 +150,7 @@ namespace Gauss_Seidel_Serial
                 if (i > 0)
                     re += "\n";
                 string disRow = string.Format("{0:0.###}", A[i, 0]) + " * x" + 1.ToString();
-                for (int j = 0; j < A.Width; j++)
+                for (int j = 1; j < A.Width; j++)
                 {
                     disRow += " + " + string.Format("{0:0.###}", A[i, j]) + " * x" + (j + 1).ToString();
                 }
