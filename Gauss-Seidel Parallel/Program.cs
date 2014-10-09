@@ -117,10 +117,6 @@ namespace Gauss_Seidel_Parallel
                             comm.Send("start", r, 0);
                         }
                         bool converge = Gauss_Seidel.solve(As[j], bs[j], out x, out err, out loops, ref comm);
-                        for (int r = 1; r < comm.Size; r++)
-                        {
-                            comm.Send("exit", r, 0);
-                        }
                         xs.Add(x);
                         loopses.Add(loops);
                         converges.Add(converge);
