@@ -42,7 +42,10 @@ namespace Gauss_Seidel_Serial
             {
                 new_x = T * x + C;
                 if (converge = Matrix.AllClose(new_x, x, 1e-16)) // converge
+                {
+                    loops++;
                     break;
+                }
                 x = new_x;
             }
             //Console.WriteLine("Iteration took " + bm.getResult());
