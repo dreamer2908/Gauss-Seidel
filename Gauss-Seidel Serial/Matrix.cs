@@ -428,6 +428,23 @@ namespace Gauss_Seidel_Serial
             }
         }
 
+        // absolute value
+        public void Abs()
+        {
+            for (int i = 0; i < this.Height; i++)
+                for (int j = 0; j < this.Width; j++)
+                    this[i, j] = Math.Abs(this[i, j]);
+        }
+
+        public static Matrix Abs(Matrix m)
+        {
+            Matrix re = zeroLike(m);
+            for (int i = 0; i < m.Height; i++)
+                for (int j = 0; j < m.Width; j++)
+                    re[i, j] = Math.Abs(m[i, j]);
+            return re;
+        }
+
         #endregion
 
         #region Advanced matrix functions
