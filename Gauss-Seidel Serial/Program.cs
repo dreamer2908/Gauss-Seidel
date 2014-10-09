@@ -10,6 +10,11 @@ namespace Gauss_Seidel_Serial
     {
         static void Main(string[] _args)
         {
+            string programName = "Gauss-Seidel Linear System of Equations Solver";
+            string programVer = "1.0 (serial)";
+            string programAuthor = "Quy N.H.";
+            Console.WriteLine(programName + " v" + programVer + " by " + programAuthor + "\n");
+
             bool testing = false;
             string[] args = _args;
             if (testing)

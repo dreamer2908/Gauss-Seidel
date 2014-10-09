@@ -9,6 +9,14 @@ namespace Gauss_Seidel_Parallel
     {
         static void Main(string[] args)
         {
+            string programName = "Gauss-Seidel Linear System of Equations Solver";
+            string programVer = "1.0 (parallel)";
+            string programAuthor = "Quy N.H.";
+            Console.WriteLine(programName + " v" + programVer + " by " + programAuthor + "\n");
+
+
+            Console.WriteLine("Done. Press a key to exit...");
+            Console.ReadKey();
         }
     }
 }
