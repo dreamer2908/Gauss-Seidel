@@ -97,5 +97,20 @@ namespace Gauss_Seidel_Serial.Test
                 catch (Exception) {Console.WriteLine("None.\n"); }
             }
         }
+
+        [TestCase(100, 3)]
+        [TestCase(999, 10)]
+        [TestCase(999, 3)]
+        [TestCase(991, 13)]
+        [TestCase(5, 7)]
+        public void splitJob_VariousInputs_ChecksThem(int jobs, int machines)
+        {
+            Matrix re = Utils.splitJob(jobs, machines);
+            Console.WriteLine(re.ToString());
+            Assert.LessOrEqual(re.maxValue, jobs);
+            Assert.GreaterOrEqual(re.maxValue, 0);
+            Assert.LessOrEqual(Math.Abs(re.maxValue - re.minValue), 1);
+            Assert.AreEqual(jobs, re.totalValue);
+        }
     }
 }

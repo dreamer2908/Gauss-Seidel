@@ -118,5 +118,32 @@ namespace Gauss_Seidel_Serial
                 }
             }
         }
+
+        public static Matrix splitJob(int jobs, int machines)
+        {
+            Matrix re = new Matrix(1, machines);
+            if (jobs >= machines)
+            {
+                re.numFill((int)Math.Floor(1.0 * jobs / machines));
+                if (jobs % machines != 0) // there're still some jobs unassigned
+                {
+                    double remainJobsForEach = 1.0 * (jobs % machines) / machines;
+                    int groupSize = (int)(1.0 / remainJobsForEach); // one machine from each group will be assigned one more job
+                    for (int i = 0; i < machines; i++)
+                    {
+                        if (i % groupSize == 0)
+                            re[0, i] += 1;
+                        if (i == machines - 1) //last one takes the rest
+                            re[0, i] += jobs - re.totalValue;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < jobs; i++)
+                    re[0, i] = 1;
+            }
+            return re;
+        }
     }
 }
