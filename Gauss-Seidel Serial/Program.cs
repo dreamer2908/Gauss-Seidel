@@ -144,20 +144,19 @@ namespace Gauss_Seidel_Serial
         private static string writeEquation(Matrix A, Matrix b)
         {
             // assume valid inputs
-            string re = "";
+            StringBuilder re = new StringBuilder();
             for (int i = 0; i < A.Height; i++)
             {
                 if (i > 0)
-                    re += "\n";
-                string disRow = string.Format("{0:0.###}", A[i, 0]) + " * x" + 1.ToString();
+                    re.Append("\n");
+                re.Append(string.Format("{0:0.###}", A[i, 0]) + " * x" + 1.ToString());
                 for (int j = 1; j < A.Width; j++)
                 {
-                    disRow += " + " + string.Format("{0:0.###}", A[i, j]) + " * x" + (j + 1).ToString();
+                    re.Append(" + " + string.Format("{0:0.###}", A[i, j]) + " * x" + (j + 1).ToString());
                 }
-                disRow += " = " + string.Format("{0:0.###}", b[i, 0]);
-                re += disRow;
+                re.Append(" = " + string.Format("{0:0.###}", b[i, 0]));
             }
-            return re;
+            return re.ToString();
         }
     }
 }
