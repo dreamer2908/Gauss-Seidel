@@ -26,6 +26,8 @@ namespace Gauss_Seidel_Serial
         public int Width { get { return _matrix.GetLength(1); } }
         public int dim1 { get { return _matrix.GetLength(0); } }
         public int dim2 { get { return _matrix.GetLength(1); } }
+        public int row { get { return _matrix.GetLength(0); } }
+        public int column { get { return _matrix.GetLength(1); } }
 
         private static Random _r = new Random(); // random number generator had better be static
 
