@@ -8,9 +8,12 @@ namespace Gauss_Seidel_Serial
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _args)
         {
-            // string[] argss = "-o output.txt -b 200 -t 10".Split(new char[] { ' ' });
+            bool testing = false;
+            string[] args = _args;
+            if (testing)
+                args = "-o output.txt -b 200 -t 10".Split(new char[] { ' ' });
             // parse args
             string inputFile = "", outputFile = "";
             bool benchmarkMode = false, showEquation = false;
@@ -107,8 +110,8 @@ namespace Gauss_Seidel_Serial
                     strResult += "\nEquation:\n" + writeEquation(As[j], bs[j]);
                 strResult += "\nNo. equations: " + x.Height.ToString();
                 strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-16);
-                strResult += "\nError: " + Matrix.Transpose(err).ToString(1e-16);
-                strResult += "\nAvg error: " + string.Format("{0:0.################}", err.avgValue);
+                strResult += "\nErrors: " + Matrix.Transpose(err).ToString(1e-16);
+                strResult += "\nMean absolute error: " + string.Format("{0:0.################}", Matrix.Abs(err).avgValue);
                 strResult += "\nConverged: " + converge.ToString();
                 strResult += "\nLoops: " + loops.ToString();
                 writeOutput(outputFile, strResult);
