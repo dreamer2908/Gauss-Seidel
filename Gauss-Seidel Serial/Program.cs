@@ -112,7 +112,7 @@ namespace Gauss_Seidel_Serial
                 bool converge = converges[j];
                 string strResult = "";
                 if (showEquation)
-                    strResult += "\nEquation:\n" + writeEquation(As[j], bs[j]);
+                    strResult += "\nEquation:\n" + Utils.writeEquation(As[j], bs[j]);
                 strResult += "\nNo. equations: " + x.Height.ToString();
                 strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-16);
                 strResult += "\nErrors: " + Matrix.Transpose(err).ToString(1e-16);
@@ -139,24 +139,6 @@ namespace Gauss_Seidel_Serial
             {
                 Console.WriteLine(strResult);
             }
-        }
-
-        private static string writeEquation(Matrix A, Matrix b)
-        {
-            // assume valid inputs
-            StringBuilder re = new StringBuilder();
-            for (int i = 0; i < A.Height; i++)
-            {
-                if (i > 0)
-                    re.Append("\n");
-                re.Append(string.Format("{0:0.###}", A[i, 0]) + " * x" + 1.ToString());
-                for (int j = 1; j < A.Width; j++)
-                {
-                    re.Append(" + " + string.Format("{0:0.###}", A[i, j]) + " * x" + (j + 1).ToString());
-                }
-                re.Append(" = " + string.Format("{0:0.###}", b[i, 0]));
-            }
-            return re.ToString();
         }
     }
 }

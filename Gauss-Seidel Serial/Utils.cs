@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace Gauss_Seidel_Serial
 {
@@ -144,6 +145,36 @@ namespace Gauss_Seidel_Serial
                     re[0, i] = 1;
             }
             return re;
+        }
+
+        public static void writeOutput(string outputFile, string strResult)
+        {
+            if (outputFile != "")
+            {
+                File.AppendAllText(outputFile, strResult.Replace("\n", "\r\n"));
+            }
+            else
+            {
+                Console.WriteLine(strResult);
+            }
+        }
+
+        public static string writeEquation(Matrix A, Matrix b)
+        {
+            // assume valid inputs
+            StringBuilder re = new StringBuilder();
+            for (int i = 0; i < A.Height; i++)
+            {
+                if (i > 0)
+                    re.Append("\n");
+                re.Append(string.Format("{0:0.###}", A[i, 0]) + " * x" + 1.ToString());
+                for (int j = 1; j < A.Width; j++)
+                {
+                    re.Append(" + " + string.Format("{0:0.###}", A[i, j]) + " * x" + (j + 1).ToString());
+                }
+                re.Append(" = " + string.Format("{0:0.###}", b[i, 0]));
+            }
+            return re.ToString();
         }
     }
 }
