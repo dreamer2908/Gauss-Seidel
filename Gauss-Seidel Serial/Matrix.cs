@@ -504,9 +504,9 @@ namespace Gauss_Seidel_Serial
                 throw e;
             }
             Matrix re = new Matrix(rows, m.Width);
-            for (int i = start; i < end + 1; i++)
+            for (int i = 0; i < rows; i++)
                 for (int j = 0; j < m.Width; j++)
-                    re[i, j] = m[i, j];
+                    re[i, j] = m[i + start, j];
             return re;
         }
 
