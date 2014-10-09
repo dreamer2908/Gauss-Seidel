@@ -14,9 +14,19 @@ namespace Gauss_Seidel_Serial
 
         Stopwatch stopWatch;
 
-        public void startBenchmark()
+        public void start()
         {
             stopWatch.Reset();
+            stopWatch.Start();
+        }
+
+        public void pause()
+        {
+            stopWatch.Stop();
+        }
+
+        public void resume()
+        {
             stopWatch.Start();
         }
 
@@ -26,7 +36,7 @@ namespace Gauss_Seidel_Serial
             return format(ts);
         }
 
-        public string getBenchmarkResult()
+        public string getResult()
         {
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
@@ -36,6 +46,12 @@ namespace Gauss_Seidel_Serial
         private string format(TimeSpan ts)
         {
             return (String.Format("{0:00}:{1:00}:{2:00}.{3:000}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds));
+        }
+
+        public double getElapsedSeconds()
+        {
+            TimeSpan ts = stopWatch.Elapsed;
+            return ts.TotalSeconds;
         }
     }
 }

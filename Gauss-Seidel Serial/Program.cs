@@ -90,7 +90,7 @@ namespace Gauss_Seidel_Serial
             benchmark bm = new benchmark();
             string bmResult = "";
 
-            bm.startBenchmark();
+            bm.start();
             for (int j = 0; j < equCounts; j++)
             {
                 Console.WriteLine("Solving system equation #" + (j + 1).ToString());
@@ -102,7 +102,7 @@ namespace Gauss_Seidel_Serial
                 converges.Add(converge);
                 errs.Add(err);
             }
-            bmResult = bm.getBenchmarkResult();
+            bmResult = bm.getResult();
 
             // write output
             for (int j = 0; j < equCounts; j++)
