@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Gauss_Seidel_Serial
 {
+    [Serializable]
     public class Matrix
     {
         private readonly Double[,] _matrix;
