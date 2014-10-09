@@ -212,12 +212,12 @@ namespace Gauss_Seidel_Serial.Test
         }
         #endregion
 
-        # region Tests for determinant
+        # region Tests for Determinant
         [TestCase(1, 1, 1, 1)]
         [TestCase(5, 2, -7, -3)]
         [TestCase(5, 8, 17, 3)]
         [TestCase(5, 3, 5, 3)]
-        public void determinant_2x2Inputs_ChecksThem(int m2_00, int m2_01, int m2_10, int m2_11)
+        public void Determinant_2x2Inputs_ChecksThem(int m2_00, int m2_01, int m2_10, int m2_11)
         {
             Matrix m2 = new Matrix(2, 2);
             m2[0, 0] = m2_00;
@@ -225,7 +225,7 @@ namespace Gauss_Seidel_Serial.Test
             m2[1, 0] = m2_10;
             m2[1, 1] = m2_11;
             Double expected = m2[0, 0] * m2[1, 1] - m2[0, 1] * m2[1, 0];
-            Assert.AreEqual(expected, m2.determinant());
+            Assert.AreEqual(expected, (int)(Matrix.Determinant(m2)));
         }
 
         [TestCase(-2, 2, -3, -1, 1, 3, 2, 0, -1, 18)]
@@ -235,7 +235,7 @@ namespace Gauss_Seidel_Serial.Test
         [TestCase(2, -3, -2, -6, 3, 3, -2, -3, -2, 12)]
         [TestCase(-4, 5, 2, -3, 4, 2, -1, 2, 5, -3)]
         [TestCase(1, -3, -6, -1, 5, 5, -1, 6, 5, 1)]
-        public void determinant_3x3Inputs_ChecksThem(int m1_00, int m1_01, int m1_02, int m1_10, int m1_11, int m1_12, int m1_20, int m1_21, int m1_22, int expected)
+        public void Determinant_3x3Inputs_ChecksThem(int m1_00, int m1_01, int m1_02, int m1_10, int m1_11, int m1_12, int m1_20, int m1_21, int m1_22, int expected)
         {
             Matrix m1 = new Matrix(3, 3);
             m1[0, 0] = m1_00;
@@ -247,13 +247,13 @@ namespace Gauss_Seidel_Serial.Test
             m1[2, 0] = m1_20;
             m1[2, 1] = m1_21;
             m1[2, 2] = m1_22;
-            Assert.AreEqual(expected, m1.determinant());
+            Assert.AreEqual(expected, (int)(Matrix.Determinant(m1)));
         }
 
         [TestCase(9, 3, 5, 1, -6, -9, 7, 2, -1, -8, 1, 3, 9, 3, 5, 0, -615)]
         [TestCase(0, -3, 25, 8, -1, -2, 9, -2, 11, -4, 1, 0, -5, 3, -5, 1, 0)]
         [TestCase(20, -3, 0, 18, -1, -12, 0, 2, 4, 4, -1, 12, -25, 13, 0, 21, 11107)]
-        public void determinant_4x4Inputs_ChecksThem(int m1_00, int m1_01, int m1_02, int m1_03, int m1_10, int m1_11, int m1_12, int m1_13, int m1_20, int m1_21, int m1_22, int m1_23, int m1_30, int m1_31, int m1_32, int m1_33, int expected)
+        public void Determinant_4x4Inputs_ChecksThem(int m1_00, int m1_01, int m1_02, int m1_03, int m1_10, int m1_11, int m1_12, int m1_13, int m1_20, int m1_21, int m1_22, int m1_23, int m1_30, int m1_31, int m1_32, int m1_33, int expected)
         {
             Matrix m1 = new Matrix(4, 4);
             m1[0, 0] = m1_00;
@@ -272,7 +272,7 @@ namespace Gauss_Seidel_Serial.Test
             m1[3, 1] = m1_31;
             m1[3, 2] = m1_32;
             m1[3, 3] = m1_33;
-            Assert.AreEqual(expected, m1.determinant());
+            Assert.AreEqual(expected, (int)(Matrix.Determinant(m1)));
         }
         #endregion
 
