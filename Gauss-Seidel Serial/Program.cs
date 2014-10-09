@@ -122,6 +122,7 @@ namespace Gauss_Seidel_Serial
                 writeOutput(outputFile, strResult);
             }
             writeOutput(outputFile, "\nTotal time: " + bmResult);
+            writeOutput(outputFile, "\nAvg time: " + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " second per equation.");
             writeOutput(outputFile, "\n");
 
             Console.WriteLine("Done. Press a key to exit...");
