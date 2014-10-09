@@ -117,6 +117,7 @@ namespace Gauss_Seidel_Parallel
                 if (converge = Matrix.AllClose(new_x, x, 1e-16))
                 {
                     //Console.WriteLine("Converged.");
+                    loops++;
                     break;
                 }
 
