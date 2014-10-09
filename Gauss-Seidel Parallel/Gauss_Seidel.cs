@@ -97,6 +97,7 @@ namespace Gauss_Seidel_Parallel
 
                 // gather result
                 int offset = 0;
+                new_x = Matrix.zeroLike(x);
                 for (int p = 0; p < slaves; p++)
                 {
                     if (jobDistro[0, p] > 0)
