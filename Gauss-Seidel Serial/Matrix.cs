@@ -162,6 +162,44 @@ namespace Gauss_Seidel_Serial
                 return val / (this.Height * this.Width);
             }
         }
+
+        public double totalValue
+        {
+            get
+            {
+                double val = 0;
+                for (int i = 0; i < this.Height; i++)
+                    for (int j = 0; j < this.Width; j++)
+                        val += this[i, j];
+                return val;
+            }
+        }
+
+        public double minValue
+        {
+            get
+            {
+                double min = this[0,0];
+                for (int i = 0; i < this.Height; i++)
+                    for (int j = 0; j < this.Width; j++)
+                        if (this[i, j] < min)
+                            min = this[i, j];
+                return min;
+            }
+        }
+
+        public double maxValue
+        {
+            get
+            {
+                double max = this[0, 0];
+                for (int i = 0; i < this.Height; i++)
+                    for (int j = 0; j < this.Width; j++)
+                        if (this[i, j] > max)
+                            max = this[i, j];
+                return max;
+            }
+        }
         #endregion
 
         #region Operators
