@@ -112,7 +112,15 @@ namespace Gauss_Seidel_Parallel
                         Console.WriteLine("Solving system equation #" + (j + 1).ToString());
                         Matrix x, err;
                         int loops = 0;
+                        for (int r = 1; r < comm.Size; r++)
+                        {
+                            comm.Send("start", r, 0);
+                        }
                         bool converge = Gauss_Seidel.solve(As[j], bs[j], out x, out err, out loops, ref comm);
+                        for (int r = 1; r < comm.Size; r++)
+                        {
+                            comm.Send("exit", r, 0);
+                        }
                         xs.Add(x);
                         loopses.Add(loops);
                         converges.Add(converge);
@@ -187,7 +195,7 @@ namespace Gauss_Seidel_Parallel
                 if (i > 0)
                     re += "\n";
                 string disRow = string.Format("{0:0.###}", A[i, 0]) + " * x" + 1.ToString();
-                for (int j = 0; j < A.Width; j++)
+                for (int j = 1; j < A.Width; j++)
                 {
                     disRow += " + " + string.Format("{0:0.###}", A[i, j]) + " * x" + (j + 1).ToString();
                 }
