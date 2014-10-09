@@ -72,7 +72,7 @@ namespace Gauss_Seidel_Parallel
 
             loops = 0;
             Boolean converge = false;
-            int ITERATION_LIMIT = 100; // if it still doesn't converge after this many loops, assume it won't converge and give up
+            int ITERATION_LIMIT = 1000; // if it still doesn't converge after this many loops, assume it won't converge and give up
             //bm.start();
             for (; loops < ITERATION_LIMIT; loops++)
             {
