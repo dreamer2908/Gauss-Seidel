@@ -72,7 +72,7 @@ namespace Gauss_Seidel_Serial
             else if (inputFile.Length > 0)
             {
                 // parse input
-                string[] inputArray = File.ReadAllLines(inputFile);
+                string inputArray = File.ReadAllText(inputFile);
                 Utils.parseInput(inputArray, out As, out bs, out sols);
             }
             else
