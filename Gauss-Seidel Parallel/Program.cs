@@ -44,19 +44,7 @@ namespace Gauss_Seidel_Parallel
                     while (i < args.Length)
                     {
                         string arg = args[i];
-                        if (arg.StartsWith("-"))
-                        {
-                            arg = arg.Substring(1);
-                            switch (arg)
-                            {
-                                case "i": if (i + 1 < args.Length) inputFile = args[i + 1]; break;
-                                case "o": if (i + 1 < args.Length) outputFile = args[i + 1]; break;
-                                case "s": showEquation = true; break;
-                                case "b": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
-                                case "t": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
-                            }
-                        }
-                        else if (arg.StartsWith("--"))
+                        if (arg.StartsWith("--"))
                         {
                             arg = arg.Substring(2);
                             switch (arg)
@@ -66,6 +54,18 @@ namespace Gauss_Seidel_Parallel
                                 case "show-equation": showEquation = true; break;
                                 case "benchmark": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
                                 case "times": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
+                            }
+                        }
+                        else if (arg.StartsWith("-"))
+                        {
+                            arg = arg.Substring(1);
+                            switch (arg)
+                            {
+                                case "i": if (i + 1 < args.Length) inputFile = args[i + 1]; break;
+                                case "o": if (i + 1 < args.Length) outputFile = args[i + 1]; break;
+                                case "s": showEquation = true; break;
+                                case "b": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
+                                case "t": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
                             }
                         }
                         i++;
