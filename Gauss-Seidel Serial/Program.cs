@@ -21,7 +21,7 @@ namespace Gauss_Seidel_Serial
                 args = "-o output.txt -b 200 -t 10".Split(new char[] { ' ' });
             // parse args
             string inputFile = "", outputFile = "";
-            bool benchmarkMode = false, showEquation = false;
+            bool benchmarkMode = false, showEquation = false, generateInput = false;
             int benchmarkSize = 3;
             int benchmarkTime = 1;
             int i = 0;
@@ -36,6 +36,7 @@ namespace Gauss_Seidel_Serial
                         case "input": if (i + 1 < args.Length) inputFile = args[i + 1]; break;
                         case "output": if (i + 1 < args.Length) outputFile = args[i + 1]; break;
                         case "show-equation": showEquation = true; break;
+                        case "generate-input": generateInput = true; break;
                         case "benchmark": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
                         case "times": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
                     }
@@ -48,6 +49,7 @@ namespace Gauss_Seidel_Serial
                         case "i": if (i + 1 < args.Length) inputFile = args[i + 1]; break;
                         case "o": if (i + 1 < args.Length) outputFile = args[i + 1]; break;
                         case "s": showEquation = true; break;
+                        case "g": generateInput = true; break;
                         case "b": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
                         case "t": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
                     }
@@ -105,25 +107,48 @@ namespace Gauss_Seidel_Serial
             bmResult = bm.getResult();
 
             // write output
-            for (int j = 0; j < equCounts; j++)
+            if (!generateInput)
             {
-                Matrix x = xs[j], err = errs[j];
-                int loops = loopses[j];
-                bool converge = converges[j];
-                string strResult = "";
-                if (showEquation)
-                    strResult += "\nEquation:\n" + Utils.writeEquation(As[j], bs[j]);
-                strResult += "\nNo. equations: " + x.Height.ToString();
-                strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-16);
-                strResult += "\nErrors: " + Matrix.Transpose(err).ToString(1e-16);
-                strResult += "\nMean absolute error: " + string.Format("{0:0.################}", Matrix.Abs(err).avgValue);
-                strResult += "\nConverged: " + converge.ToString();
-                strResult += "\nLoops: " + loops.ToString();
-                writeOutput(outputFile, strResult);
+                // show the result as usual
+                for (int j = 0; j < equCounts; j++)
+                {
+                    Matrix x = xs[j], err = errs[j];
+                    int loops = loopses[j];
+                    bool converge = converges[j];
+                    string strResult = "";
+                    if (showEquation)
+                        strResult += "\nEquation:\n" + Utils.writeEquation(As[j], bs[j]);
+                    strResult += "\nNo. equations: " + x.Height.ToString();
+                    strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-16);
+                    strResult += "\nErrors: " + Matrix.Transpose(err).ToString(1e-16);
+                    strResult += "\nMean absolute error: " + string.Format("{0:0.################}", Matrix.Abs(err).avgValue);
+                    strResult += "\nConverged: " + converge.ToString();
+                    strResult += "\nLoops: " + loops.ToString();
+                    writeOutput(outputFile, strResult);
+                }
+                writeOutput(outputFile, "\nTotal time: " + bmResult);
+                writeOutput(outputFile, "\nAvg time: " + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " second per equation.");
+                writeOutput(outputFile, "\n");
             }
-            writeOutput(outputFile, "\nTotal time: " + bmResult);
-            writeOutput(outputFile, "\nAvg time: " + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " second per equation.");
-            writeOutput(outputFile, "\n");
+            else
+            {
+                // create a valid input file
+                for (int j = 0; j < equCounts; j++)
+                {
+                    Matrix x = xs[j], err = errs[j];
+                    int loops = loopses[j];
+                    bool converge = converges[j];
+                    string strResult = "-----------\n";
+                    strResult += x.Height.ToString();
+                    strResult += "\n";
+                    strResult += As[j].ToString();
+                    strResult += "\n";
+                    strResult += Matrix.Transpose(bs[j]).ToString();
+                    strResult += "\n";
+                    strResult += Matrix.Transpose(x).ToString(1e-16);
+                    writeOutput(outputFile, strResult);
+                }
+            }
 
             Console.WriteLine("Done. Press a key to exit...");
             Console.ReadKey();
