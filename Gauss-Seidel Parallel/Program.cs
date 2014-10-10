@@ -158,7 +158,7 @@ namespace Gauss_Seidel_Parallel
                             Matrix x = xs[j], err = errs[j];
                             int loops = loopses[j];
                             bool converge = converges[j];
-                            string strResult = "-----------\n";
+                            string strResult = "\n-----------\n";
                             strResult += x.Height.ToString();
                             strResult += "\n";
                             strResult += As[j].ToString();
