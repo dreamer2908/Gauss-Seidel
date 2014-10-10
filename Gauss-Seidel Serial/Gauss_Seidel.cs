@@ -41,7 +41,7 @@ namespace Gauss_Seidel_Serial
             for (; loops < ITERATION_LIMIT; loops++)
             {
                 new_x = T * x + C;
-                if (converge = Matrix.AllClose(new_x, x, 1e-16)) // converge
+                if (converge = Matrix.AllClose(new_x, x, 1e-15)) // converge
                 {
                     loops++;
                     break;
@@ -49,7 +49,9 @@ namespace Gauss_Seidel_Serial
                 x = new_x;
             }
             //Console.WriteLine("Iteration took " + bm.getResult());
+            x.Round(1e-14);
             err = A * x - b;
+            err.Round(1e-14);
 
             return converge;
         }

@@ -114,7 +114,7 @@ namespace Gauss_Seidel_Parallel
 
                 //Console.WriteLine(new_x.ToString());
                 // check converge
-                if (converge = Matrix.AllClose(new_x, x, 1e-16))
+                if (converge = Matrix.AllClose(new_x, x, 1e-15))
                 {
                     //Console.WriteLine("Converged.");
                     loops++;
@@ -131,7 +131,9 @@ namespace Gauss_Seidel_Parallel
             }
 
             //Console.WriteLine("Iteration took " + bm.getResult());
+            x.Round(1e-14);
             err = A * x - b;
+            err.Round(1e-14);
 
             return converge;
         }

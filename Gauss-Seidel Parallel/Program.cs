@@ -139,16 +139,16 @@ namespace Gauss_Seidel_Parallel
                             if (showEquation)
                                 strResult += "\nEquation:\n" + Utils.writeEquation(As[j], bs[j]);
                             strResult += "\nNo. equations: " + x.Height.ToString();
-                            strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-16);
-                            strResult += "\nErrors: " + Matrix.Transpose(err).ToString(1e-16);
-                            strResult += "\nMean absolute error: " + string.Format("{0:0.################}", Matrix.Abs(err).avgValue);
+                            strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-14);
+                            strResult += "\nErrors: " + Matrix.Transpose(err).ToString(1e-14);
+                            strResult += "\nMean absolute error: " + string.Format("{0:0.#############}", Matrix.Abs(err).avgValue);
                             strResult += "\nConverged: " + converge.ToString();
                             strResult += "\nLoops: " + loops.ToString();
                             writeOutput(outputFile, strResult);
                         }
                         writeOutput(outputFile, "\nTotal time: " + bmResult);
-                        writeOutput(outputFile, "\nAvg time: " + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " second per equation.");
-                        writeOutput(outputFile, "\n");
+                        writeOutput(outputFile, "Avg time: " + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " second per equation.");
+                        writeOutput(outputFile, "");
                     }
                     else
                     {
@@ -165,9 +165,13 @@ namespace Gauss_Seidel_Parallel
                             strResult += "\n";
                             strResult += Matrix.Transpose(bs[j]).ToString();
                             strResult += "\n";
-                            strResult += Matrix.Transpose(x).ToString(1e-16);
+                            strResult += Matrix.Transpose(x).ToString(1e-14);
+                            strResult += "\n";
                             writeOutput(outputFile, strResult);
                         }
+                        writeOutput("", "\nTotal time: " + bmResult);
+                        writeOutput("", "Avg time: " + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " second per equation.");
+                        writeOutput("", "");
                     }
 
                     Console.WriteLine("Done. Exiting...");
