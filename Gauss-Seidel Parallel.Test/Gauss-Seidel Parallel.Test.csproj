@@ -61,6 +61,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="..\Gauss-Seidel Serial\Matrix.cs" />
     <Compile Include="..\Gauss-Seidel Serial\benchmark.cs" />
+    <Compile Include="..\Gauss-Seidel Serial\Utils.cs" />
+    <Compile Include="..\Gauss-Seidel Serial\Gauss_Seidel.cs" />
+    <Compile Include="..\Gauss-Seidel Parallel\Gauss_Seidel_Parallel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
