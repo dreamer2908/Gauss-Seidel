@@ -7,7 +7,7 @@ using MPI;
 
 namespace Gauss_Seidel_Parallel
 {
-    class Gauss_Seidel
+    class Gauss_Seidel_Parallel
     {
         // return true if it converges. Output: solution matrix, errors, loops it took
         public static Boolean solve(Matrix A, Matrix b, out Matrix x, out Matrix err, out int loops, ref Intracommunicator comm)

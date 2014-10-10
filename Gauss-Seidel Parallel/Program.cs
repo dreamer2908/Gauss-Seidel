@@ -118,7 +118,7 @@ namespace Gauss_Seidel_Parallel
                         {
                             comm.Send("start", r, 0);
                         }
-                        bool converge = Gauss_Seidel.solve(As[j], bs[j], out x, out err, out loops, ref comm);
+                        bool converge = Gauss_Seidel_Parallel.solve(As[j], bs[j], out x, out err, out loops, ref comm);
                         xs.Add(x);
                         loopses.Add(loops);
                         converges.Add(converge);
@@ -192,7 +192,7 @@ namespace Gauss_Seidel_Parallel
                         command = comm.Receive<string>(0, 0); // receive command from rank 0
                         if (command == "start")
                         {
-                            Gauss_Seidel.solveSub(ref comm);
+                            Gauss_Seidel_Parallel.solveSub(ref comm);
                         }
                     } while (command != "exit");
                 }

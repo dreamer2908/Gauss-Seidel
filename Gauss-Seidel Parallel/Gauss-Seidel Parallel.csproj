@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Gauss_Seidel.cs" />
+    <Compile Include="Gauss_Seidel_Parallel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="..\Gauss-Seidel Serial\Matrix.cs" />
     <Compile Include="..\Gauss-Seidel Serial\benchmark.cs" />
