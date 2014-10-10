@@ -95,7 +95,7 @@ namespace Gauss_Seidel_Serial
             bm.start();
             for (int j = 0; j < equCounts; j++)
             {
-                Console.WriteLine("Solving system equation #" + (j + 1).ToString());
+                Console.Write("Solving system #" + (j + 1).ToString() + "... ");
                 Matrix x , err;
                 int loops = 0;
                 bool converge = Gauss_Seidel.solve(As[j], bs[j], out x, out err, out loops);
@@ -103,6 +103,7 @@ namespace Gauss_Seidel_Serial
                 loopses.Add(loops);
                 converges.Add(converge);
                 errs.Add(err);
+                Console.WriteLine("Done.");
             }
             bmResult = bm.getResult();
 
@@ -110,6 +111,7 @@ namespace Gauss_Seidel_Serial
             if (!generateInput)
             {
                 // show the result as usual
+                writeOutput(outputFile, "\n");
                 for (int j = 0; j < equCounts; j++)
                 {
                     Matrix x = xs[j], err = errs[j];
@@ -126,8 +128,7 @@ namespace Gauss_Seidel_Serial
                     strResult += "\nLoops: " + loops.ToString();
                     writeOutput(outputFile, strResult);
                 }
-                writeOutput(outputFile, "\nTotal time: " + bmResult);
-                writeOutput(outputFile, "Avg time: " + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " second per equation.");
+                writeOutput(outputFile, "\nElapsed time: " + bmResult + " (" + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " sec / equation).");
                 writeOutput(outputFile, "");
             }
             else
@@ -149,8 +150,7 @@ namespace Gauss_Seidel_Serial
                     strResult += "\n";
                     writeOutput(outputFile, strResult);
                 }
-                writeOutput("", "\nTotal time: " + bmResult);
-                writeOutput("", "Avg time: " + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " second per equation.");
+                writeOutput("", "\nElapsed time: " + bmResult + " (" + string.Format("{0:0.###}", bm.getElapsedSeconds() / equCounts) + " sec / equation).");
                 writeOutput("", "");
             }
 
