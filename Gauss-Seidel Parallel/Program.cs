@@ -31,7 +31,7 @@ namespace Gauss_Seidel_Parallel
                         MPI.Environment.Abort(1);
                     }
 
-                    bool testing = true;
+                    bool testing = false;
                     string[] args = _args;
                     if (testing)
                         args = "-o output.txt -b 200 -t 10".Split(new char[] { ' ' });
