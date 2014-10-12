@@ -235,7 +235,7 @@ namespace Gauss_Seidel_Serial
 
         public static Matrix operator *(Matrix m1, Matrix m2)
         {
-            return Multiply(m1, m2);
+            return UnsafeMultiplication(m1, m2);
         }
 
         public static Matrix operator *(Matrix m1, Double scalar)
@@ -323,6 +323,37 @@ namespace Gauss_Seidel_Serial
                 for (int j = 0; j < re.Width; j++)
                     re[i, j] = m1[i, j] * scalar;
             return re;
+        }
+
+        // see http://www.bratched.com/en/home/dotnet/48-fun-with-matrix-multiplication-and-unsafe-code.html
+        public unsafe static Matrix UnsafeMultiplication(Matrix m1, Matrix m2)
+        {
+            int h = m1.Height;
+            int w = m2.Width;
+            int l = m1.Width;
+            Matrix resultMatrix = new Matrix(h, w);
+            unsafe
+            {
+                fixed (double* pm = resultMatrix._matrix, pm1 = m1._matrix, pm2 = m2._matrix)
+                {
+                    int i1, i2;
+                    for (int i = 0; i < h; i++)
+                    {
+                        i1 = i * l;
+                        for (int j = 0; j < w; j++)
+                        {
+                            i2 = j;
+                            double res = 0;
+                            for (int k = 0; k < l; k++, i2 += w)
+                            {
+                                res += pm1[i1 + k] * pm2[i2];
+                            }
+                            pm[i * w + j] = res;
+                        }
+                    }
+                }
+            }
+            return resultMatrix;
         }
 
         // Scalar multiply matrix m1 by 1/scalar
@@ -736,6 +767,7 @@ namespace Gauss_Seidel_Serial
         }
 
         // Doolittle LUP decomposition.
+        // see http://msdn.microsoft.com/en-us/magazine/jj863137.aspx
         public static Matrix LUPDecompose(Matrix matrix, out int[] perm, out int toggle)
         {
             // assumes matrix is square.
