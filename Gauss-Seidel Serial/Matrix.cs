@@ -838,7 +838,7 @@ namespace Gauss_Seidel_Serial
             return result;
         }
 
-        private static double[] HelperSolve(Matrix luMatrix, double[] b)
+        public static double[] HelperSolve(Matrix luMatrix, double[] b)
         {
             // solve luMatrix * x = b
             int n = luMatrix.dim1;
