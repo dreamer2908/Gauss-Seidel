@@ -7,8 +7,10 @@ namespace Gauss_Seidel_Serial
 {
     class Gauss_Seidel
     {
+        public static bool showBenchmark = false;
+
         // return true if it converges. Output: solution matrix, errors, loops it took
-       public static Boolean solve(Matrix A, Matrix b, out Matrix x, out Matrix err, out int loops)
+        public static Boolean solve(Matrix A, Matrix b, out Matrix x, out Matrix err, out int loops)
         {
             // check sanity
             if (!A.isSquare || !b.isColumn || (A.Height != b.Height))
@@ -19,36 +21,54 @@ namespace Gauss_Seidel_Serial
 
             // follow samples in Wikipedia step by step https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method
 
+            benchmark bm = new benchmark();
+
             // decompose A into the sum of a lower triangular component L* and a strict upper triangular component U
+            int size = A.Height;
             Matrix L, U;
             Matrix.Decompose(A, out L, out U);
-            //benchmark bm = new benchmark();
-            //bm.start();
-            Matrix L_1 = ~L; // inverse of L*
-            //Console.WriteLine("Matrix inversion took " + bm.getResult());
 
-            // x (at step k+1) = T * x (at step k) + C
-            // where T = - (inverse of L*) * U and C = (inverse of L*) * b
+            bm.start();
+            // Inverse matrix L*
+            Matrix L_1 = ~L;
+            if (showBenchmark)
+                Console.WriteLine("Matrix inversion took " + bm.getResult());
+
+            // Main iteration: x (at step k+1) = T * x (at step k) + C
+            // where T = - (inverse of L*) * U, and C = (inverse of L*) * b
+
+            // init necessary variables
             x = Matrix.zeroLike(b); // at step k
-            Matrix new_x = Matrix.zeroLike(x); // at step k + 1
+            Matrix new_x; // at step k + 1
             Matrix T = -L_1 * U;
             Matrix C = L_1 * b;
 
+            // the actual iteration
+            // if it still doesn't converge after this many loops, assume it won't converge and give up
             loops = 0;
             Boolean converge = false;
-            int ITERATION_LIMIT = 1000; // if it still doesn't converge after this many loops, assume it won't converge and give up
-            //bm.start();
-            for (; loops < ITERATION_LIMIT; loops++)
+            int loopLimit = 100;
+            bm.start();
+            for (; loops < loopLimit; loops++)
             {
-                new_x = T * x + C;
-                if (converge = Matrix.AllClose(new_x, x, 1e-15)) // converge
+                new_x = T * x + C; // yup, only one line
+
+                // consider it's converged if it changes less than threshold (1e-15)
+                if (converge = Matrix.AllClose(new_x, x, 1e-15))
                 {
+                    x = new_x;
                     loops++;
                     break;
                 }
+
+                // save result
                 x = new_x;
             }
-            //Console.WriteLine("Iteration took " + bm.getResult());
+
+            if (showBenchmark)
+                Console.WriteLine("Iteration took " + bm.getResult());
+
+            // round the result slightly
             x.Round(1e-14);
             err = A * x - b;
             err.Round(1e-14);
