@@ -562,6 +562,26 @@ namespace Gauss_Seidel_Serial
             return true;
         }
 
+        public static Boolean SomeClose(Matrix m1, Matrix m2, Double maxDiff, int startRow)
+        {
+            if (m1.Width != m2.Width)
+            {
+                Exception e = new Exception("Two matrixes must have the same width!");
+                throw e;
+            }
+            if (m1.Height > m2.Height)
+            {
+                Exception e = new Exception("Matrix m2's height must be equal to or greater than m1's!");
+                throw e;
+            }
+
+            for (int i = 0; i < m1.Height; i++)
+                for (int j = 0; j < m1.Width; j++)
+                    if (Math.Abs(m1[i, j] - m2[startRow + i, j]) > Math.Abs(maxDiff))
+                        return false;
+            return true;
+        }
+
         // Decompose matrix into L (and L*) using Cholesky algorithm
         public static Boolean CholeskyDecompose(Matrix A, out Matrix L)
         {
