@@ -42,7 +42,6 @@ namespace Gauss_Seidel_Parallel
 
             // init necessary variables
             x = Matrix.zeroLike(b); // at step k
-            Matrix new_x; // at step k + 1
             Matrix T = -L_1 * U;
             Matrix C = L_1 * b;
 
@@ -52,10 +51,12 @@ namespace Gauss_Seidel_Parallel
             int slaves = comm.Size - 1;
             Matrix jobDistro = Utils.splitJob(size, slaves);
             List<Matrix> tPieces = new List<Matrix>(), cPieces = new List<Matrix>();
+            List<int> startRows = new List<int>();
             int start = 0;
             for (int p = 0; p < slaves; p++)
             {
                 Matrix tP = null, cP = null;
+                startRows.Add(start);
                 if (jobDistro[0, p] > 0) // only attempt to give job(s) if it has been assigned at least one
                 {
                     int end = start + (int)jobDistro[0, p] - 1;
@@ -76,6 +77,10 @@ namespace Gauss_Seidel_Parallel
                     comm.Send(tPieces[p], p + 1, 11); // as we notice slaves before sending data
                     comm.Send("receivec", p + 1, 10); // but whatever :v
                     comm.Send(cPieces[p], p + 1, 12);
+                    comm.Send("setstartrow", p + 1, 10);
+                    comm.Send(startRows[p], p + 1, 14);
+                    comm.Send("setthreshold", p + 1, 10);
+                    comm.Send(1e-15, p + 1, 15);
                 }
             }
 
@@ -105,34 +110,39 @@ namespace Gauss_Seidel_Parallel
                         comm.Send("continue", p + 1, 10);
                 }
 
-                // collect result new_x
+                // collect result x
                 int offset = 0;
-                new_x = Matrix.zeroLike(x); // must create a new, separated matrix. wasted half an hour because of this
                 for (int p = 0; p < slaves; p++)
                 {
                     if (jobDistro[0, p] > 0)
                     {
                         // collect piece of new_x from this slave
                         comm.Send("sendx", p + 1, 10);
-                        Matrix new_xp = comm.Receive<Matrix>(p + 1, 10);
+                        Matrix xp = comm.Receive<Matrix>(p + 1, 10);
                         // copy to its correct place in x
-                        for (int r = 0; r < new_xp.Height; r++)
-                            for (int c = 0; c < new_xp.Width; c++)
-                                new_x[offset + r, c] = new_xp[r, c];
-                        offset += new_xp.Height;
+                        for (int r = 0; r < xp.Height; r++)
+                            for (int c = 0; c < xp.Width; c++)
+                                x[offset + r, c] = xp[r, c];
+                        offset += xp.Height;
                     }
                 }
 
-                // consider it's converged if it changes less than threshold (1e-15)
-                if (converge = Matrix.AllClose(new_x, x, 1e-15))
+                // collect convergence. consider converged if ALL slaves claim so
+                for (int p = 0; p < slaves; p++)
                 {
-                    x = new_x;
+                    if (jobDistro[0, p] > 0)
+                    {
+                        comm.Send("converge", p + 1, 10);
+                        converge = comm.Receive<bool>(p + 1, 16);
+                        if (!converge)
+                            break;
+                    }
+                }
+                if (converge)
+                {
                     loops++;
                     break;
                 }
-
-                // save result
-                x = new_x;
             }
 
             // command them to exit
@@ -161,30 +171,24 @@ namespace Gauss_Seidel_Parallel
             // command: continue, sendx, receivex, receivet, receivec, exit
 
             Matrix T = null, C = null, x = null, new_x = null;
+            int startRow = 0;
+            bool converge = false;
+            double convergeThreshold = 1e-15;
 
             string command;
             do
             {
                 command = comm.Receive<string>(0, 10);
-                if (command == "continue")
+                switch (command)
                 {
-                    new_x = T * x + C;
-                }
-                else if (command == "sendx")
-                {
-                    comm.Send(new_x, 0, 10);
-                }
-                else if (command == "receivex")
-                {
-                    x = comm.Receive<Matrix>(0, 13);
-                }
-                else if (command == "receivet")
-                {
-                    T = comm.Receive<Matrix>(0, 11);
-                }
-                else if (command == "receivec")
-                {
-                    C = comm.Receive<Matrix>(0, 12);
+                    case "continue": new_x = T * x + C; converge = Matrix.SomeClose(new_x, x, convergeThreshold, startRow); break;
+                    case "sendx": comm.Send(new_x, 0, 10); break;
+                    case "converge": comm.Send(converge, 0, 16); break;
+                    case "receivet": T = comm.Receive<Matrix>(0, 11); break;
+                    case "receivec": C = comm.Receive<Matrix>(0, 12); break;
+                    case "receivex": x = comm.Receive<Matrix>(0, 13); break;
+                    case "setstartrow": startRow = comm.Receive<int>(0, 14); break;
+                    case "setthreshold": convergeThreshold = comm.Receive<Double>(0, 15); break;
                 }
             } while (command != "exit");
         }
