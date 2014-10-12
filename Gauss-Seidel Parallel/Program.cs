@@ -84,12 +84,14 @@ namespace Gauss_Seidel_Parallel
                             As.Add(Matrix.generateDiagonallyDominantMatrix(benchmarkSize, true, -100, 100));
                             bs.Add(Matrix.random(benchmarkSize, 1, -100, 100, true));
                         }
+                        Console.WriteLine("Generated " + benchmarkTime.ToString() + " random system(s) to solve.");
                     }
-                    else if (inputFile.Length > 0)
+                    else if (inputFile.Length > 0 && File.Exists(inputFile))
                     {
                         // parse input
                         string inputArray = File.ReadAllText(inputFile);
                         Utils.parseInput(inputArray, out As, out bs, out sols);
+                        Console.WriteLine("Got " + As.Count.ToString() + " system(s) from input file.");
                     }
                     else
                     {
@@ -107,6 +109,8 @@ namespace Gauss_Seidel_Parallel
                     int equCounts = As.Count;
                     benchmark bm = new benchmark();
                     string bmResult = "";
+
+                    Console.WriteLine("Now working with " + (comm.Size - 1).ToString() + " sub-processes...\n");
 
                     bm.start();
                     for (int j = 0; j < equCounts; j++)
@@ -131,7 +135,8 @@ namespace Gauss_Seidel_Parallel
                     if (!generateInput)
                     {
                         // show the result as usual
-                        writeOutput(outputFile, "\n");
+                        if (outputFile.Length > 0)
+                            writeOutput(outputFile, "\n");
                         for (int j = 0; j < equCounts; j++)
                         {
                             Matrix x = xs[j], err = errs[j];
@@ -143,7 +148,7 @@ namespace Gauss_Seidel_Parallel
                             strResult += "\nNo. equations: " + x.Height.ToString();
                             strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-14);
                             strResult += "\nErrors: " + Matrix.Transpose(err).ToString(1e-14);
-                            strResult += "\nMean absolute error: " + string.Format("{0:0.#############}", Matrix.Abs(err).avgValue);
+                            strResult += "\nMean absolute error: " + string.Format("{0:0.##############}", Matrix.Abs(err).avgValue);
                             strResult += "\nConverged: " + converge.ToString();
                             strResult += "\nLoops: " + loops.ToString();
                             writeOutput(outputFile, strResult);

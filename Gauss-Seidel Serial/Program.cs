@@ -68,12 +68,14 @@ namespace Gauss_Seidel_Serial
                     As.Add(Matrix.generateDiagonallyDominantMatrix(benchmarkSize, true, -100, 100));
                     bs.Add(Matrix.random(benchmarkSize, 1, -100, 100, true));
                 }
+                Console.WriteLine("Generated " + benchmarkTime.ToString() + " random system(s) to solve.");
             }
-            else if (inputFile.Length > 0)
+            else if (inputFile.Length > 0 && File.Exists(inputFile))
             {
                 // parse input
                 string inputArray = File.ReadAllText(inputFile);
                 Utils.parseInput(inputArray, out As, out bs, out sols);
+                Console.WriteLine("Got " + As.Count.ToString() + " system(s) from input file.");
             }
             else
             {
@@ -123,7 +125,7 @@ namespace Gauss_Seidel_Serial
                     strResult += "\nNo. equations: " + x.Height.ToString();
                     strResult += "\nSolution: " + Matrix.Transpose(x).ToString(1e-14);
                     strResult += "\nErrors: " + Matrix.Transpose(err).ToString(1e-14);
-                    strResult += "\nMean absolute error: " + string.Format("{0:0.#############}", Matrix.Abs(err).avgValue);
+                    strResult += "\nMean absolute error: " + string.Format("{0:0.##############}", Matrix.Abs(err).avgValue);
                     strResult += "\nConverged: " + converge.ToString();
                     strResult += "\nLoops: " + loops.ToString();
                     writeOutput(outputFile, strResult);
