@@ -544,6 +544,33 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        public static Matrix extractColumns(Matrix m, int _start, int _end)
+        {
+            int start = _start, end = _end;
+            if (start > end)
+            {
+                int tmp = start;
+                start = end;
+                end = tmp;
+            }
+            if (start < 0 || end > m.column)
+            {
+                Exception e = new Exception("Start must be greater than 0, and end must be equal to or smaller than matrix m's height!");
+                throw e;
+            }
+            int columns = end - start + 1;
+            if (columns < 1)
+            {
+                Exception e = new Exception("Number of columns to extract must be at least 1!");
+                throw e;
+            }
+            Matrix re = new Matrix(m.row, columns);
+            for (int i = 0; i < m.row; i++)
+                for (int j = 0; j < columns; j++)
+                    re[i, j] = m[i, j + start];
+            return re;
+        }
+
         #endregion
 
         #region Advanced matrix functions
