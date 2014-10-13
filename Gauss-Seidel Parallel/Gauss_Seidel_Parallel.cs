@@ -24,72 +24,84 @@ namespace Gauss_Seidel_Parallel
 
             // follow samples in Wikipedia step by step https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method
 
-            benchmark bm = new benchmark();
+            benchmark bm = new benchmark(), bm2 = new benchmark(), bm3 = new benchmark();
+            double sequential = 0, parallel = 0;
+            bm.start();
 
+            bm2.start();
             // decompose A into the sum of a lower triangular component L* and a strict upper triangular component U
             int size = A.Height;
-            Matrix L, U;
+            Matrix L, U, L_1;
             Matrix.Decompose(A, out L, out U);
+            sequential += bm2.getElapsedSeconds();
 
-            bm.start();
+            bm2.start();
             // Inverse matrix L*
-            Matrix L_1 = ~L;
-            if (showBenchmark)
-                Console.WriteLine("Matrix inversion took " + bm.getResult());
+            sendMsgToAllSlaves(comm, "inverse");
+            L_1 = MatrixParallel.Inverse(L, comm);
+            parallel += bm2.getElapsedSeconds();
 
             // Main iteration: x (at step k+1) = T * x (at step k) + C
             // where T = - (inverse of L*) * U, and C = (inverse of L*) * b
 
+            bm2.start();
             // init necessary variables
             x = Matrix.zeroLike(b); // at step k
-            Matrix T = -L_1 * U;
-            Matrix C = L_1 * b;
 
             // split T & C into groups of rows, each for one slave, according to the nature of this algorithm
             // each slave will have one piece of T & one piece of C stored locally. the rest of T & C is not needed
             // there might be cases where jobs > slaves, so some might get no job at all
+            // Changes: only split L_1. Slaves will calculate T & C (pieces) themselves
             int slaves = comm.Size - 1;
             Matrix jobDistro = Utils.splitJob(size, slaves);
-            List<Matrix> tPieces = new List<Matrix>(), cPieces = new List<Matrix>();
+            List<Matrix> L_1Pieces = new List<Matrix>();
             List<int> startRows = new List<int>();
             int start = 0;
             for (int p = 0; p < slaves; p++)
             {
-                Matrix tP = null, cP = null;
+                Matrix L_1P = null;
                 startRows.Add(start);
                 if (jobDistro[0, p] > 0) // only attempt to give job(s) if it has been assigned at least one
                 {
                     int end = start + (int)jobDistro[0, p] - 1;
-                    tP = Matrix.extractRows(T, start, end);
-                    cP = Matrix.extractRows(C, start, end);
+                    L_1P = Matrix.extractRows(L_1, start, end);
                     start = end + 1;
                 }
-                tPieces.Add(tP);
-                cPieces.Add(cP);
+                L_1Pieces.Add(L_1P);
             }
+            sequential += bm2.getElapsedSeconds();
 
+            bm2.start();
             // distribute pieces to slaves
             for (int p = 0; p < slaves; p++)
             {
                 if (jobDistro[0, p] > 0)
                 {
-                    comm.Send("receivet", p + 1, 10); // it's not really necessary to tag data differently
-                    comm.Send(tPieces[p], p + 1, 11); // as we notice slaves before sending data
-                    comm.Send("receivec", p + 1, 10); // but whatever :v
-                    comm.Send(cPieces[p], p + 1, 12);
-                    comm.Send("setstartrow", p + 1, 10);
+                    // it's not really necessary to tag data differently as we notice slaves before sending data
+                    // but whatever :v
+                    comm.Send("rec_l", p + 1, 10);
+                    comm.Send(L_1Pieces[p], p + 1, 16);
+                    comm.Send("rec_u", p + 1, 10);
+                    comm.Send(U, p + 1, 17);
+                    comm.Send("rec_b", p + 1, 10);
+                    comm.Send(b, p + 1, 18);
+                    comm.Send("set_startrow", p + 1, 10);
                     comm.Send(startRows[p], p + 1, 14);
-                    comm.Send("setthreshold", p + 1, 10);
+                    comm.Send("set_threshold", p + 1, 10);
                     comm.Send(1e-15, p + 1, 15);
+                    comm.Send("calc_tc", p + 1, 10);
                 }
             }
+            parallel += bm2.getElapsedSeconds();
 
             // the actual iteration
             // if it still doesn't converge after this many loops, assume it won't converge and give up
+            bm2.start();
             loops = 0;
             Boolean converge = false;
             int loopLimit = 100;
-            bm.start();
+            sequential += bm2.getElapsedSeconds();
+            bm2.start();
             for (; loops < loopLimit; loops++)
             {
                 // (re-)distributing x vector. Must be done every single loop
@@ -98,7 +110,7 @@ namespace Gauss_Seidel_Parallel
                 {
                     if (jobDistro[0, p] > 0)
                     {
-                        comm.Send("receivex", p + 1, 10);
+                        comm.Send("rec_x", p + 1, 10);
                         comm.Send(x, p + 1, 13);
                     }
                 }
@@ -107,7 +119,7 @@ namespace Gauss_Seidel_Parallel
                 for (int p = 0; p < slaves; p++)
                 {
                     if (jobDistro[0, p] > 0)
-                        comm.Send("continue", p + 1, 10);
+                        comm.Send("calc_x", p + 1, 10);
                 }
 
                 // collect result x
@@ -117,7 +129,7 @@ namespace Gauss_Seidel_Parallel
                     if (jobDistro[0, p] > 0)
                     {
                         // collect piece of new_x from this slave
-                        comm.Send("sendx", p + 1, 10);
+                        comm.Send("send_x", p + 1, 10);
                         Matrix xp = comm.Receive<Matrix>(p + 1, 10);
                         // copy to its correct place in x
                         for (int r = 0; r < xp.Height; r++)
@@ -150,16 +162,34 @@ namespace Gauss_Seidel_Parallel
             {
                 comm.Send("exit", p + 1, 10);
             }
+            parallel += bm2.getElapsedSeconds();
 
-            if (showBenchmark)
-                Console.WriteLine("Iteration took " + bm.getResult());
-
+            bm2.start();
             // round the result slightly
             x.Round(1e-14);
             err = A * x - b;
             err.Round(1e-14);
+            sequential += bm2.getElapsedSeconds();
+
+            bm.pause();
+            if (showBenchmark)
+                Console.WriteLine("Sequential part took " + sequential + " secs.");
+
+            if (showBenchmark)
+                Console.WriteLine("Parallel part took " + parallel + " secs.");
+
+            if (showBenchmark)
+                Console.WriteLine("Total: " + bm.getResult() + " (" + bm.getElapsedSeconds() + " secs). Sum: " + (sequential + parallel));
 
             return converge;
+        }
+
+        private static void sendMsgToAllSlaves(Intracommunicator comm, string msg)
+        {
+            for (int i = 1; i < comm.Size; i++)
+            {
+                comm.Send(msg, i, 10);
+            }
         }
 
         // method ranks 1+ call. does the actual iterating calculation
@@ -170,7 +200,7 @@ namespace Gauss_Seidel_Parallel
             // only do something when master (rank 0) tells it to
             // command: continue, sendx, receivex, receivet, receivec, exit
 
-            Matrix T = null, C = null, x = null, new_x = null;
+            Matrix T = null, C = null, x = null, new_x = null, L_1 = null, U = null, b = null;
             int startRow = 0;
             bool converge = false;
             double convergeThreshold = 1e-15;
@@ -181,14 +211,19 @@ namespace Gauss_Seidel_Parallel
                 command = comm.Receive<string>(0, 10);
                 switch (command)
                 {
-                    case "continue": new_x = T * x + C; converge = Matrix.SomeClose(new_x, x, convergeThreshold, startRow); break;
-                    case "sendx": comm.Send(new_x, 0, 10); break;
+                    case "calc_x": new_x = T * x + C; converge = Matrix.SomeClose(new_x, x, convergeThreshold, startRow); break;
+                    case "calc_tc": T = -L_1 * U; C = L_1 * b; break;
+                    case "send_x": comm.Send(new_x, 0, 10); break;
                     case "converge": comm.Send(converge, 0, 16); break;
-                    case "receivet": T = comm.Receive<Matrix>(0, 11); break;
-                    case "receivec": C = comm.Receive<Matrix>(0, 12); break;
-                    case "receivex": x = comm.Receive<Matrix>(0, 13); break;
-                    case "setstartrow": startRow = comm.Receive<int>(0, 14); break;
-                    case "setthreshold": convergeThreshold = comm.Receive<Double>(0, 15); break;
+                    case "rec_t": T = comm.Receive<Matrix>(0, 11); break;
+                    case "rec_c": C = comm.Receive<Matrix>(0, 12); break;
+                    case "rec_x": x = comm.Receive<Matrix>(0, 13); break;
+                    case "set_startrow": startRow = comm.Receive<int>(0, 14); break;
+                    case "set_threshold": convergeThreshold = comm.Receive<Double>(0, 15); break;
+                    case "rec_l": L_1 = comm.Receive<Matrix>(0, 16); break;
+                    case "rec_u": U = comm.Receive<Matrix>(0, 17); break;
+                    case "rec_b": b = comm.Receive<Matrix>(0, 18); break;
+                    case "inverse": MatrixParallel.Inverse(comm); break;
                 }
             } while (command != "exit");
         }
