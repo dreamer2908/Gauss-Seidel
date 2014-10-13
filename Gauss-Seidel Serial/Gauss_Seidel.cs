@@ -21,34 +21,43 @@ namespace Gauss_Seidel_Serial
 
             // follow samples in Wikipedia step by step https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method
 
-            benchmark bm = new benchmark();
+            benchmark bm = new benchmark(), bm2 = new benchmark(), bm3 = new benchmark();
+            double sequential = 0, parallel = 0;
+            bm.start();
 
+            bm2.start();
             // decompose A into the sum of a lower triangular component L* and a strict upper triangular component U
             int size = A.Height;
             Matrix L, U;
             Matrix.Decompose(A, out L, out U);
+            sequential += bm2.getElapsedSeconds();
 
-            bm.start();
+            bm2.start();
             // Inverse matrix L*
             Matrix L_1 = ~L;
-            if (showBenchmark)
-                Console.WriteLine("Matrix inversion took " + bm.getResult());
+            parallel += bm2.getElapsedSeconds();
 
             // Main iteration: x (at step k+1) = T * x (at step k) + C
             // where T = - (inverse of L*) * U, and C = (inverse of L*) * b
 
+            bm2.start();
             // init necessary variables
             x = Matrix.zeroLike(b); // at step k
             Matrix new_x; // at step k + 1
+            sequential += bm2.getElapsedSeconds();
+            bm2.start();
             Matrix T = -L_1 * U;
             Matrix C = L_1 * b;
+            parallel += bm2.getElapsedSeconds();
 
             // the actual iteration
             // if it still doesn't converge after this many loops, assume it won't converge and give up
+            bm2.start();
             loops = 0;
             Boolean converge = false;
             int loopLimit = 100;
-            bm.start();
+            sequential += bm2.getElapsedSeconds();
+            bm2.start();
             for (; loops < loopLimit; loops++)
             {
                 new_x = T * x + C; // yup, only one line
@@ -64,14 +73,22 @@ namespace Gauss_Seidel_Serial
                 // save result
                 x = new_x;
             }
+            parallel += bm2.getElapsedSeconds();
 
-            if (showBenchmark)
-                Console.WriteLine("Iteration took " + bm.getResult());
-
+            bm2.start();
             // round the result slightly
             x.Round(1e-14);
             err = A * x - b;
             err.Round(1e-14);
+            sequential += bm2.getElapsedSeconds();
+
+            bm.pause();
+            if (showBenchmark)
+            {
+                Console.WriteLine("Sequential part took " + sequential + " secs.");
+                Console.WriteLine("Parallel part took " + parallel + " secs.");
+                Console.WriteLine("Total: " + bm.getResult() + " (" + bm.getElapsedSeconds() + " secs). Sum: " + (sequential + parallel));
+            }
 
             return converge;
         }

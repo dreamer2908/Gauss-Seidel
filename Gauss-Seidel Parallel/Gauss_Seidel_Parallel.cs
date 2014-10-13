@@ -25,7 +25,7 @@ namespace Gauss_Seidel_Parallel
             // follow samples in Wikipedia step by step https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method
 
             benchmark bm = new benchmark(), bm2 = new benchmark(), bm3 = new benchmark();
-            double sequential = 0, parallel = 0;
+            double sequential = 0, parallel = 0, communication = 0;
             bm.start();
 
             bm2.start();
@@ -38,8 +38,10 @@ namespace Gauss_Seidel_Parallel
             bm2.start();
             // Inverse matrix L*
             sendMsgToAllSlaves(comm, "inverse");
-            L_1 = MatrixParallel.Inverse(L, comm);
+            bm2.pause();
             parallel += bm2.getElapsedSeconds();
+            communication += bm2.getElapsedSeconds();
+            L_1 = MatrixParallel.Inverse(L, comm, ref sequential, ref parallel, ref communication);
 
             // Main iteration: x (at step k+1) = T * x (at step k) + C
             // where T = - (inverse of L*) * U, and C = (inverse of L*) * b
@@ -69,7 +71,9 @@ namespace Gauss_Seidel_Parallel
                 }
                 L_1Pieces.Add(L_1P);
             }
+            bm2.pause();
             sequential += bm2.getElapsedSeconds();
+            communication += bm2.getElapsedSeconds();
 
             bm2.start();
             // distribute pieces to slaves
@@ -92,7 +96,9 @@ namespace Gauss_Seidel_Parallel
                     comm.Send("calc_tc", p + 1, 10);
                 }
             }
+            bm2.pause();
             parallel += bm2.getElapsedSeconds();
+            communication += bm2.getElapsedSeconds();
 
             // the actual iteration
             // if it still doesn't converge after this many loops, assume it won't converge and give up
@@ -104,6 +110,7 @@ namespace Gauss_Seidel_Parallel
             bm2.start();
             for (; loops < loopLimit; loops++)
             {
+                bm3.start();
                 // (re-)distributing x vector. Must be done every single loop
                 // this loop needs x from the previous loop
                 for (int p = 0; p < slaves; p++)
@@ -121,7 +128,17 @@ namespace Gauss_Seidel_Parallel
                     if (jobDistro[0, p] > 0)
                         comm.Send("calc_x", p + 1, 10);
                 }
+                communication += bm3.getElapsedSeconds();
 
+                // waiting for done message
+                for (int p = 0; p < slaves; p++)
+                {
+                    if (jobDistro[0, p] > 0)
+                    {
+                        comm.Receive<string>(p + 1, 10);
+                    }
+                }
+                bm3.start();
                 // collect result x
                 int offset = 0;
                 for (int p = 0; p < slaves; p++)
@@ -150,6 +167,8 @@ namespace Gauss_Seidel_Parallel
                             break;
                     }
                 }
+                bm3.pause();
+                communication += bm3.getElapsedSeconds();
                 if (converge)
                 {
                     loops++;
@@ -157,11 +176,10 @@ namespace Gauss_Seidel_Parallel
                 }
             }
 
+            bm3.start();
             // command them to exit
-            for (int p = 0; p < slaves; p++)
-            {
-                comm.Send("exit", p + 1, 10);
-            }
+            sendMsgToAllSlaves(comm, "exit");
+            communication += bm3.getElapsedSeconds();
             parallel += bm2.getElapsedSeconds();
 
             bm2.start();
@@ -173,13 +191,12 @@ namespace Gauss_Seidel_Parallel
 
             bm.pause();
             if (showBenchmark)
+            {
                 Console.WriteLine("Sequential part took " + sequential + " secs.");
-
-            if (showBenchmark)
                 Console.WriteLine("Parallel part took " + parallel + " secs.");
-
-            if (showBenchmark)
+                Console.WriteLine("Communication took " + communication + " secs.");
                 Console.WriteLine("Total: " + bm.getResult() + " (" + bm.getElapsedSeconds() + " secs). Sum: " + (sequential + parallel));
+            }
 
             return converge;
         }
@@ -203,7 +220,8 @@ namespace Gauss_Seidel_Parallel
             Matrix T = null, C = null, x = null, new_x = null, L_1 = null, U = null, b = null;
             int startRow = 0;
             bool converge = false;
-            double convergeThreshold = 1e-15;
+            double convergeThreshold = 1e-15, timeC = 0;
+            benchmark bm = new benchmark();
 
             string command;
             do
@@ -211,21 +229,23 @@ namespace Gauss_Seidel_Parallel
                 command = comm.Receive<string>(0, 10);
                 switch (command)
                 {
-                    case "calc_x": new_x = T * x + C; converge = Matrix.SomeClose(new_x, x, convergeThreshold, startRow); break;
+                    case "calc_x": new_x = T * x + C; converge = Matrix.SomeClose(new_x, x, convergeThreshold, startRow); comm.Send("done", 0, 10); break;
                     case "calc_tc": T = -L_1 * U; C = L_1 * b; break;
                     case "send_x": comm.Send(new_x, 0, 10); break;
                     case "converge": comm.Send(converge, 0, 16); break;
-                    case "rec_t": T = comm.Receive<Matrix>(0, 11); break;
-                    case "rec_c": C = comm.Receive<Matrix>(0, 12); break;
-                    case "rec_x": x = comm.Receive<Matrix>(0, 13); break;
+                    case "rec_t": bm.start(); T = comm.Receive<Matrix>(0, 11); timeC += bm.getElapsedSeconds(); break;
+                    case "rec_c": bm.start(); C = comm.Receive<Matrix>(0, 12); timeC += bm.getElapsedSeconds(); break;
+                    case "rec_x": bm.start(); x = comm.Receive<Matrix>(0, 13); timeC += bm.getElapsedSeconds(); break;
                     case "set_startrow": startRow = comm.Receive<int>(0, 14); break;
                     case "set_threshold": convergeThreshold = comm.Receive<Double>(0, 15); break;
-                    case "rec_l": L_1 = comm.Receive<Matrix>(0, 16); break;
-                    case "rec_u": U = comm.Receive<Matrix>(0, 17); break;
-                    case "rec_b": b = comm.Receive<Matrix>(0, 18); break;
-                    case "inverse": MatrixParallel.Inverse(comm); break;
+                    case "rec_l": bm.start(); L_1 = comm.Receive<Matrix>(0, 16); timeC += bm.getElapsedSeconds(); break;
+                    case "rec_u": bm.start(); U = comm.Receive<Matrix>(0, 17); timeC += bm.getElapsedSeconds(); break;
+                    case "rec_b": bm.start(); b = comm.Receive<Matrix>(0, 18); timeC += bm.getElapsedSeconds(); break;
+                    case "inverse": MatrixParallel.Inverse(comm, ref timeC); break;
                 }
             } while (command != "exit");
+            if (showBenchmark)
+                Console.WriteLine("Communication time @ rank " + comm.Rank + ": " + timeC.ToString());
         }
 
         // if u don't care about error

@@ -21,7 +21,7 @@ namespace Gauss_Seidel_Serial
                 args = "-o output.txt -b 200 -t 10".Split(new char[] { ' ' });
             // parse args
             string inputFile = "", outputFile = "";
-            bool benchmarkMode = false, showEquation = false, generateInput = false;
+            bool benchmarkMode = false, showEquation = false, generateInput = false, showBenchmark = false;
             int benchmarkSize = 3;
             int benchmarkTime = 1;
             int i = 0;
@@ -36,6 +36,7 @@ namespace Gauss_Seidel_Serial
                         case "input": if (i + 1 < args.Length) inputFile = args[i + 1]; break;
                         case "output": if (i + 1 < args.Length) outputFile = args[i + 1]; break;
                         case "show-equation": showEquation = true; break;
+                        case "show-benchmark": showBenchmark = true; break;
                         case "generate-input": generateInput = true; break;
                         case "benchmark": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
                         case "times": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
@@ -48,7 +49,8 @@ namespace Gauss_Seidel_Serial
                     {
                         case "i": if (i + 1 < args.Length) inputFile = args[i + 1]; break;
                         case "o": if (i + 1 < args.Length) outputFile = args[i + 1]; break;
-                        case "s": showEquation = true; break;
+                        case "e": showEquation = true; break;
+                        case "m": showBenchmark = true; break;
                         case "g": generateInput = true; break;
                         case "b": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkSize)) { benchmarkMode = true; i++; }; break;
                         case "t": if (i + 1 < args.Length && int.TryParse(args[i + 1], out benchmarkTime)) { benchmarkMode = true; i++; }; break;
@@ -93,6 +95,8 @@ namespace Gauss_Seidel_Serial
             int equCounts = As.Count;
             benchmark bm = new benchmark();
             string bmResult = "";
+
+            Gauss_Seidel.showBenchmark = showBenchmark;
 
             bm.start();
             for (int j = 0; j < equCounts; j++)

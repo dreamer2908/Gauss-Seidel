@@ -17,12 +17,21 @@ namespace Gauss_Seidel_Parallel
 
         public static Matrix Inverse(Matrix matrix, Intracommunicator comm)
         {
+            double timeS = 0, timeP = 0, timeC = 0;
+            return Inverse(matrix, comm, ref timeS, ref timeP, ref timeC);
+        }
+
+        public static Matrix Inverse(Matrix matrix, Intracommunicator comm, ref double timeS, ref double timeP, ref double timeC)
+        {
             if (!matrix.isSquare)
             {
                 gtfo(comm);
                 Exception e = new Exception("Matrix must be square!");
                 throw e;
             }
+
+            benchmark bm = new benchmark(), bm2 = new benchmark();
+            bm.start();
 
             int n = matrix.dim1;
             Matrix result = zeroLike(matrix);
@@ -48,6 +57,9 @@ namespace Gauss_Seidel_Parallel
             int slaves = comm.Size - 1;
             Matrix jobDistro = Utils.splitJob(n, slaves);
 
+            timeS += bm.getElapsedSeconds();
+            bm.start();
+            bm2.start();
             int start = 0;
             for (int p = 0; p < slaves; p++)
             {
@@ -65,7 +77,16 @@ namespace Gauss_Seidel_Parallel
                     start += (int)jobDistro[0, p];
                 }
             }
-
+            bm2.pause();
+            timeC += bm2.getElapsedSeconds();
+            for (int p = 0; p < slaves; p++)
+            {
+                if (jobDistro[0, p] > 0) // waiting for done message
+                {
+                    comm.Receive<string>(p + 1, 10);
+                }
+            }
+            bm2.start();
             int offset = 0;
             for (int p = 0; p < slaves; p++)
             {
@@ -83,6 +104,9 @@ namespace Gauss_Seidel_Parallel
             }
 
             gtfo(comm);
+            bm.pause();
+            timeP += bm.getElapsedSeconds();
+            timeC += bm2.getElapsedSeconds();
             return result;
         }
 
@@ -94,11 +118,12 @@ namespace Gauss_Seidel_Parallel
             }
         }
 
-        public static void Inverse(Intracommunicator comm)
+        public static void Inverse(Intracommunicator comm, ref double timeC)
         {
             Matrix lum = null, result = null;
             int[] perm = null;
             int offset = 0, size = 0, n = 0;
+            benchmark bm = new benchmark();
             string command;
             do
             {
@@ -124,11 +149,13 @@ namespace Gauss_Seidel_Parallel
                                     result[j, i - offset] = x[j];
                                 }
                             }
+                            bm.pause();
+                            comm.Send("done", 0, 10);
                             break;
                         }
-                    case "send_re": comm.Send(result, 0, 10); break;
-                    case "recv_lum": lum = comm.Receive<Matrix>(0, 11); n = lum.dim1; perm = new int[n]; break;
-                    case "recv_perm": comm.Receive(0, 12, ref perm); break;
+                    case "send_re": bm.start(); comm.Send(result, 0, 10); timeC += bm.getElapsedSeconds(); break;
+                    case "recv_lum": bm.start(); lum = comm.Receive<Matrix>(0, 11); timeC += bm.getElapsedSeconds(); n = lum.dim1; perm = new int[n]; break;
+                    case "recv_perm": bm.start(); comm.Receive(0, 12, ref perm); timeC += bm.getElapsedSeconds(); break;
                     case "set_offset": offset = comm.Receive<int>(0, 13); break;
                     case "set_size": size = comm.Receive<int>(0, 14); break;
                 }
