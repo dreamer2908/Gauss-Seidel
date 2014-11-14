@@ -148,11 +148,8 @@ namespace Gauss_Seidel_Parallel
                         // collect piece of new_x from this slave
                         comm.Send("send_x", p + 1, 10);
                         Matrix xp = comm.Receive<Matrix>(p + 1, 10);
-                        // copy to its correct place in x
-                        for (int r = 0; r < xp.Height; r++)
-                            for (int c = 0; c < xp.Width; c++)
-                                x[offset + r, c] = xp[r, c];
-                        offset += xp.Height;
+                        x.ImportRows(xp, offset);
+                        offset += xp.row;
                     }
                 }
 
