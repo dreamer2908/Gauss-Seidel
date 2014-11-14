@@ -13,10 +13,10 @@ namespace Gauss_Seidel_Parallel
 
         // return true if it converges. Output: solution matrix, errors, loops it took
         // rank 0 (master) calls this, while ranks 1+ call solveSub
-        public static Boolean solve(Matrix A, Matrix b, out Matrix x, out Matrix err, out int loops, ref Intracommunicator comm)
+        public static Boolean solve(Matrix A, Matrix b, out Matrix x, out Matrix err, out int loops, Intracommunicator comm)
         {
-            // check sanity
-            if (!A.isSquare || !b.isColumn || (A.Height != b.Height))
+            // check sanity. rank 0 only
+            if (comm.Rank == 0 && (!A.isSquare || !b.isColumn || (A.Height != b.Height)))
             {
                 Exception e = new Exception("Matrix A must be square! Matrix b must be a column matrix with the same height as matrix A!");
                 throw e;
@@ -30,18 +30,22 @@ namespace Gauss_Seidel_Parallel
 
             bm2.start();
             // decompose A into the sum of a lower triangular component L* and a strict upper triangular component U
-            int size = A.Height;
-            Matrix L, U, L_1;
-            Matrix.Decompose(A, out L, out U);
+            int size = 0; Matrix L = null, U = null, L_1;
+            if (comm.Rank == 0)
+            {
+                size = A.Height;
+                Matrix.Decompose(A, out L, out U);
+            }
+
+            comm.Broadcast(ref size, 0);
+            comm.Broadcast(ref U, 0);
+            comm.Broadcast(ref b, 0);
             sequential += bm2.getElapsedSeconds();
 
-            bm2.start();
             // Inverse matrix L*
-            sendMsgToAllSlaves(comm, "inverse");
-            bm2.pause();
-            parallel += bm2.getElapsedSeconds();
-            communication += bm2.getElapsedSeconds();
+            comm.Barrier();
             L_1 = MatrixParallel.Inverse(L, comm, ref sequential, ref parallel, ref communication);
+            comm.Broadcast(ref L_1, 0);
 
             // Main iteration: x (at step k+1) = T * x (at step k) + C
             // where T = - (inverse of L*) * U, and C = (inverse of L*) * b
@@ -54,118 +58,56 @@ namespace Gauss_Seidel_Parallel
             // each slave will have one piece of T & one piece of C stored locally. the rest of T & C is not needed
             // there might be cases where jobs > slaves, so some might get no job at all
             // Changes: only split L_1. Slaves will calculate T & C (pieces) themselves
-            int slaves = comm.Size - 1;
-            Matrix jobDistro = Utils.splitJob(size, slaves);
-            List<Matrix> L_1Pieces = new List<Matrix>();
-            List<int> startRows = new List<int>();
-            int start = 0;
-            for (int p = 0; p < slaves; p++)
+            // Changes: slaves will split L_1 themselves
+            Matrix jobDistro = Utils.splitJob(size, comm.Size);
+            int startRow = 0, endRow = 0, myJobSize = (int)jobDistro[0, comm.Rank];
+            for (int p = 0; p < comm.Size; p++)
             {
-                Matrix L_1P = null;
-                startRows.Add(start);
-                if (jobDistro[0, p] > 0) // only attempt to give job(s) if it has been assigned at least one
+                if (p != comm.Rank)
                 {
-                    int end = start + (int)jobDistro[0, p] - 1;
-                    L_1P = Matrix.extractRows(L_1, start, end);
-                    start = end + 1;
+                    startRow += (int)jobDistro[0, p];
                 }
-                L_1Pieces.Add(L_1P);
-            }
-            bm2.pause();
-            sequential += bm2.getElapsedSeconds();
-            communication += bm2.getElapsedSeconds();
-
-            bm2.start();
-            // distribute pieces to slaves
-            for (int p = 0; p < slaves; p++)
-            {
-                if (jobDistro[0, p] > 0)
+                else
                 {
-                    // it's not really necessary to tag data differently as we notice slaves before sending data
-                    // but whatever :v
-                    comm.Send("rec_l", p + 1, 10);
-                    comm.Send(L_1Pieces[p], p + 1, 16);
-                    comm.Send("rec_u", p + 1, 10);
-                    comm.Send(U, p + 1, 17);
-                    comm.Send("rec_b", p + 1, 10);
-                    comm.Send(b, p + 1, 18);
-                    comm.Send("set_startrow", p + 1, 10);
-                    comm.Send(startRows[p], p + 1, 14);
-                    comm.Send("set_threshold", p + 1, 10);
-                    comm.Send(1e-15, p + 1, 15);
-                    comm.Send("calc_tc", p + 1, 10);
+                    endRow = startRow + (int)jobDistro[0, p] - 1;
+                    break;
                 }
             }
+            Matrix L_1P = Matrix.extractRows(L_1, startRow, endRow);
+            Matrix T = -L_1P * U; Matrix C = L_1P * b;
             bm2.pause();
             parallel += bm2.getElapsedSeconds();
-            communication += bm2.getElapsedSeconds();
 
             // the actual iteration
             // if it still doesn't converge after this many loops, assume it won't converge and give up
-            bm2.start();
-            loops = 0;
             Boolean converge = false;
             int loopLimit = 100;
-            sequential += bm2.getElapsedSeconds();
-            bm2.start();
-            for (; loops < loopLimit; loops++)
+            for (loops = 0; loops < loopLimit; loops++)
             {
                 bm3.start();
                 // (re-)distributing x vector. Must be done every single loop
                 // this loop needs x from the previous loop
-                for (int p = 0; p < slaves; p++)
-                {
-                    if (jobDistro[0, p] > 0)
-                    {
-                        comm.Send("rec_x", p + 1, 10);
-                        comm.Send(x, p + 1, 13);
-                    }
-                }
-
-                // "ask" slaves to execute the calculation step
-                for (int p = 0; p < slaves; p++)
-                {
-                    if (jobDistro[0, p] > 0)
-                        comm.Send("calc_x", p + 1, 10);
-                }
-                communication += bm3.getElapsedSeconds();
-
-                // waiting for done message
-                for (int p = 0; p < slaves; p++)
-                {
-                    if (jobDistro[0, p] > 0)
-                    {
-                        comm.Receive<string>(p + 1, 10);
-                    }
-                }
-                bm3.start();
-                // collect result x
-                int offset = 0;
-                for (int p = 0; p < slaves; p++)
-                {
-                    if (jobDistro[0, p] > 0)
-                    {
-                        // collect piece of new_x from this slave
-                        comm.Send("send_x", p + 1, 10);
-                        Matrix xp = comm.Receive<Matrix>(p + 1, 10);
-                        x.ImportRows(xp, offset);
-                        offset += xp.row;
-                    }
-                }
-
-                // collect convergence. consider converged if ALL slaves claim so
-                for (int p = 0; p < slaves; p++)
-                {
-                    if (jobDistro[0, p] > 0)
-                    {
-                        comm.Send("converge", p + 1, 10);
-                        converge = comm.Receive<bool>(p + 1, 16);
-                        if (!converge)
-                            break;
-                    }
-                }
+                comm.Broadcast(ref x, 0);
+                comm.Barrier();
                 bm3.pause();
                 communication += bm3.getElapsedSeconds();
+
+                // calculation step
+                bm3.start();
+                Matrix new_x = T * x + C;
+
+                // check convergence
+                converge = Matrix.SomeClose(new_x, x, 1e-15, startRow);
+
+                // collect result x
+                comm.Barrier();
+                x = comm.Reduce(new_x, Matrix.Concatenate, 0);
+
+                // collect convergence. consider converged if ALL slaves claim so
+                converge = comm.Reduce(converge, bothTrue, 0);
+                comm.Broadcast(ref converge, 0);
+                bm3.pause();
+                parallel += bm3.getElapsedSeconds();
                 if (converge)
                 {
                     loops++;
@@ -173,17 +115,15 @@ namespace Gauss_Seidel_Parallel
                 }
             }
 
-            bm3.start();
-            // command them to exit
-            sendMsgToAllSlaves(comm, "exit");
-            communication += bm3.getElapsedSeconds();
-            parallel += bm2.getElapsedSeconds();
-
             bm2.start();
             // round the result slightly
-            x.Round(1e-14);
-            err = A * x - b;
-            err.Round(1e-14);
+            err = null;
+            if (comm.Rank == 0)
+            {
+                x.Round(1e-14);
+                err = A * x - b;
+                err.Round(1e-14);
+            }
             sequential += bm2.getElapsedSeconds();
 
             bm.pause();
@@ -198,6 +138,11 @@ namespace Gauss_Seidel_Parallel
             return converge;
         }
 
+        private static Boolean bothTrue(Boolean v1, Boolean v2)
+        {
+            return v1 && v2;
+        }
+
         private static void sendMsgToAllSlaves(Intracommunicator comm, string msg)
         {
             for (int i = 1; i < comm.Size; i++)
@@ -207,7 +152,7 @@ namespace Gauss_Seidel_Parallel
         }
 
         // method ranks 1+ call. does the actual iterating calculation
-        public static void solveSub(ref Intracommunicator comm)
+        public static void solveSub(Intracommunicator comm)
         {
             // receive x, C, and rows of T from main
             // loop new_x = T * x + C
@@ -246,18 +191,18 @@ namespace Gauss_Seidel_Parallel
         }
 
         // if u don't care about error
-        public static Boolean solve(Matrix A, Matrix b, out Matrix x, out int loops, ref Intracommunicator comm)
+        public static Boolean solve(Matrix A, Matrix b, out Matrix x, out int loops, Intracommunicator comm)
         {
             Matrix err;
-            return solve(A, b, out x, out err, out loops, ref comm);
+            return solve(A, b, out x, out err, out loops, comm);
         }
 
         // just use this when u don't care about convergence and loop
-        public static Matrix solve(Matrix A, Matrix b, ref Intracommunicator comm)
+        public static Matrix solve(Matrix A, Matrix b, Intracommunicator comm)
         {
             Matrix x;
             int loops;
-            solve(A, b, out x, out loops, ref comm);
+            solve(A, b, out x, out loops, comm);
             return x;
         }
 

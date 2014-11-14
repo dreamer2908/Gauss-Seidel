@@ -23,9 +23,8 @@ namespace Gauss_Seidel_Parallel
 
         public static Matrix Inverse(Matrix matrix, Intracommunicator comm, ref double timeS, ref double timeP, ref double timeC)
         {
-            if (!matrix.isSquare)
+            if (comm.Rank == 0 && !matrix.isSquare)
             {
-                gtfo(comm);
                 Exception e = new Exception("Matrix must be square!");
                 throw e;
             }
@@ -33,80 +32,86 @@ namespace Gauss_Seidel_Parallel
             benchmark bm = new benchmark(), bm2 = new benchmark();
             bm.start();
 
-            int n = matrix.dim1;
-            Matrix result = zeroLike(matrix);
-            int[] perm;
-            int toggle;
-            Matrix lum = LUPDecompose(matrix, out perm, out toggle);
+            int n = 0;
+            int[] perm = new int[10]; int toggle = 0; Matrix lum = null;
+            if (comm.Rank == 0)
+            {
+                n = matrix.dim1;
+                lum = LUPDecompose(matrix, out perm, out toggle);
+            }
+
+            comm.Broadcast(ref n, 0);
+            comm.Broadcast(ref lum, 0);
+            if (comm.Rank != 0)
+            {
+                perm = new int[n];
+            }
+            comm.Broadcast(ref perm, 0);
+            comm.Broadcast(ref toggle, 0);
+            comm.Barrier();
+
             if (lum == null)
             {
-                gtfo(comm);
                 return zeroLike(matrix);
             }
 
-            Double det = Determinant(lum, perm, toggle);
+            Double det = 0;
+            if (comm.Rank == 0)
+            {
+                det = Determinant(lum, perm, toggle);
+            }
+            comm.Broadcast(ref det, 0);
+            comm.Barrier();
             if (det == 0) // not invertible
             {
                 // still return for the sake of simplicity
                 // Zero matrix * any matrix = zero matrix
                 // so it's never a valid answer
-                gtfo(comm);
                 return zeroLike(matrix);
             }
 
-            int slaves = comm.Size - 1;
+            int slaves = comm.Size;
             Matrix jobDistro = Utils.splitJob(n, slaves);
-
+            int startCol = 0, endCol = 0, size = (int)jobDistro[0, comm.Rank];
+            for (int p = 0; p < slaves; p++)
+            {
+                if (p != comm.Rank)
+                {
+                    startCol += (int)jobDistro[0, p];
+                }
+                else
+                {
+                    endCol = startCol + (int)jobDistro[0, p] - 1;
+                    break;
+                }
+            }
             timeS += bm.getElapsedSeconds();
-            bm.start();
-            bm2.start();
-            int start = 0;
-            for (int p = 0; p < slaves; p++)
+
+            Matrix result = new Matrix(n, size);
+            for (int i = startCol; i < startCol + size; ++i)
             {
-                if (jobDistro[0, p] > 0) // only attempt to give job(s) if it has been assigned at least one
+                double[] b = new double[n];
+                for (int j = 0; j < n; ++j)
                 {
-                    comm.Send("recv_lum", p + 1, 10);
-                    comm.Send(lum, p + 1, 11);
-                    comm.Send("recv_perm", p + 1, 10);
-                    comm.Send(perm, p + 1, 12);
-                    comm.Send("set_offset", p + 1, 10);
-                    comm.Send(start, p + 1, 13);
-                    comm.Send("set_size", p + 1, 10);
-                    comm.Send((int)jobDistro[0, p], p + 1, 14);
-                    comm.Send("start", p + 1, 10);
-                    start += (int)jobDistro[0, p];
+                    if (i == perm[j])
+                        b[j] = 1.0;
+                    else
+                        b[j] = 0.0;
                 }
-            }
-            bm2.pause();
-            timeC += bm2.getElapsedSeconds();
-            for (int p = 0; p < slaves; p++)
-            {
-                if (jobDistro[0, p] > 0) // waiting for done message
+                double[] x = HelperSolve(lum, b);
+                for (int j = 0; j < n; ++j)
                 {
-                    comm.Receive<string>(p + 1, 10);
-                }
-            }
-            bm2.start();
-            int offset = 0;
-            for (int p = 0; p < slaves; p++)
-            {
-                if (jobDistro[0, p] > 0)
-                {
-                    // collect piece of result from this slave
-                    comm.Send("send_re", p + 1, 10);
-                    Matrix xp = comm.Receive<Matrix>(p + 1, 10);
-                    // copy to its correct place in result
-                    for (int c = 0; c < xp.Width; c++)
-                        for (int r = 0; r < xp.Height; r++)
-                            result[r, offset + c] = xp[r, c];
-                    offset += xp.Width;
+                    result[j, i - startCol] = x[j];
                 }
             }
 
-            gtfo(comm);
+            bm.start();
+            // collect result
+            result = comm.Reduce(result, ConcatenateColumn, 0);
+
             bm.pause();
             timeP += bm.getElapsedSeconds();
-            timeC += bm2.getElapsedSeconds();
+            timeC += bm.getElapsedSeconds();
             return result;
         }
 

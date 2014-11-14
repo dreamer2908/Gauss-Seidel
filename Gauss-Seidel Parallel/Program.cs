@@ -125,7 +125,7 @@ namespace Gauss_Seidel_Parallel
                         {
                             comm.Send("start", r, 0);
                         }
-                        bool converge = Gauss_Seidel_Parallel.solve(As[j], bs[j], out x, out err, out loops, ref comm);
+                        bool converge = Gauss_Seidel_Parallel.solve(As[j], bs[j], out x, out err, out loops, comm);
                         xs.Add(x);
                         loopses.Add(loops);
                         converges.Add(converge);
@@ -200,7 +200,8 @@ namespace Gauss_Seidel_Parallel
                         command = comm.Receive<string>(0, 0); // receive command from rank 0
                         if (command == "start")
                         {
-                            Gauss_Seidel_Parallel.solveSub(ref comm);
+                            Matrix A = null, b = null, x, err; int loops;
+                            Gauss_Seidel_Parallel.solve(A, b, out x, out err, out loops, comm);
                         }
                     } while (command != "exit");
                 }
