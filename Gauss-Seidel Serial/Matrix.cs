@@ -581,6 +581,21 @@ namespace Gauss_Seidel_Serial
             return re;
         }
 
+        public static Matrix Concatenate(Matrix m1, Matrix m2)
+        {
+            Matrix re = new Matrix(m1.row + m2.row, m1.column);
+            // use memory copying
+            Buffer.BlockCopy(m1._matrix, 0, re._matrix, 0, m1.row * m1.column * sizeof(Double));
+            Buffer.BlockCopy(m2._matrix, 0, re._matrix, m1.row * m1.column * sizeof(Double), m1.row * m1.column * sizeof(Double));
+            return re;
+        }
+
+        public void ImportRows(Matrix m2, int offset)
+        {
+            // use memory copying
+            Buffer.BlockCopy(m2._matrix, 0, this._matrix, offset * this.column * sizeof(Double), m2.row * m2.column * sizeof(Double));
+        }
+
         #endregion
 
         #region Advanced matrix functions
