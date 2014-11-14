@@ -483,21 +483,29 @@ namespace Gauss_Seidel_Serial
         public static Matrix Duplicate(Matrix m)
         {
             Matrix re = new Matrix(m.Height, m.Width);
-            for (int i = 0; i < re.Height; i++)
-                for (int j = 0; j < re.Width; j++)
-                    re[i, j] = m[i, j];
+            // Changed from traditional element-by-element copying to memory copying
+            Buffer.BlockCopy(m._matrix, 0, re._matrix, 0, m.Width * m.Height * sizeof(Double));
+            //for (int i = 0; i < re.Height; i++)
+            //    for (int j = 0; j < re.Width; j++)
+            //        re[i, j] = m[i, j];
             return re;
         }
 
         // swap row #r1 and #r2
         public void swapRows(int r1, int r2)
         {
-            for (int j = 0; j < this.dim2; j++)
-            {
-                Double tmp = this[r1, j];
-                this[r1, j] = this[r2, j];
-                this[r2, j] = tmp;
-            }
+            int length = this.dim2;
+            Double[] tmp = new Double[length];
+            // Changed from traditional element-by-element copying to memory copying
+            Buffer.BlockCopy(_matrix, (r1 * length) * sizeof(Double), tmp, 0, length * sizeof(Double));
+            Buffer.BlockCopy(_matrix, (r2 * length) * sizeof(Double), _matrix, (r1 * length) * sizeof(Double), length * sizeof(Double));
+            Buffer.BlockCopy(tmp, 0, _matrix, (r2 * length) * sizeof(Double), length * sizeof(Double));
+            //for (int j = 0; j < this.dim2; j++)
+            //{
+            //    Double tmp = this[r1, j];
+            //    this[r1, j] = this[r2, j];
+            //    this[r2, j] = tmp;
+            //}
         }
 
         // absolute value
@@ -538,9 +546,11 @@ namespace Gauss_Seidel_Serial
                 throw e;
             }
             Matrix re = new Matrix(rows, m.Width);
-            for (int i = 0; i < rows; i++)
-                for (int j = 0; j < m.Width; j++)
-                    re[i, j] = m[i + start, j];
+            // Changed from traditional element-by-element copying to memory copying
+            Buffer.BlockCopy(m._matrix, (start * m.Width) * sizeof(Double), re._matrix, 0, rows * m.Width * sizeof(Double));
+            //for (int i = 0; i < rows; i++)
+            //    for (int j = 0; j < m.Width; j++)
+            //        re[i, j] = m[i + start, j];
             return re;
         }
 
