@@ -586,7 +586,20 @@ namespace Gauss_Seidel_Serial
             Matrix re = new Matrix(m1.row + m2.row, m1.column);
             // use memory copying
             Buffer.BlockCopy(m1._matrix, 0, re._matrix, 0, m1.row * m1.column * sizeof(Double));
-            Buffer.BlockCopy(m2._matrix, 0, re._matrix, m1.row * m1.column * sizeof(Double), m1.row * m1.column * sizeof(Double));
+            Buffer.BlockCopy(m2._matrix, 0, re._matrix, m1.row * m1.column * sizeof(Double), m2.row * m2.column * sizeof(Double));
+            return re;
+        }
+
+        public static Matrix ConcatenateColumn(Matrix m1, Matrix m2)
+        {
+            Matrix re = new Matrix(m1.row, m1.column + m2.column);
+            // can't use memory copying
+            // actually, can
+            for (int i = 0; i < m1.row; i++)
+            {
+                Buffer.BlockCopy(m1._matrix, i * m1.column * sizeof(Double), re._matrix, i * re.column * sizeof(Double), m1.column * sizeof(Double));
+                Buffer.BlockCopy(m2._matrix, i * m2.column * sizeof(Double), re._matrix, (i * re.column + m1.column) * sizeof(Double), m2.column * sizeof(Double));
+            }
             return re;
         }
 
