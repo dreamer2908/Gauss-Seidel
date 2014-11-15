@@ -960,6 +960,54 @@ namespace Gauss_Seidel_Serial
             return result;
         }
 
+        public static Matrix InverseAlt(Matrix matrix, ref Double timeS, ref double timeP)
+        {
+            if (!matrix.isSquare)
+            {
+                Exception e = new Exception("Matrix must be square!");
+                throw e;
+            }
+
+            benchmark bm = new benchmark();
+            bm.start();
+            int n = matrix.dim1;
+            Matrix result = Matrix.zeroLike(matrix);
+            int[] perm;
+            int toggle;
+            Matrix lum = LUPDecompose(matrix, out perm, out toggle);
+            if (lum == null)
+                return Matrix.zeroLike(matrix); //throw new Exception("Unable to compute inverse");
+
+            Double det = Determinant(lum, perm, toggle);
+            if (det == 0) // not invertible
+            {
+                // still return for the sake of simplicity
+                // Zero matrix * any matrix = zero matrix
+                // so it's never a valid answer
+                return Matrix.zeroLike(matrix);
+            }
+            bm.pause();
+            timeS += bm.getElapsedSeconds();
+
+            bm.start();
+            double[] b = new double[n];
+            for (int i = 0; i < n; ++i)
+            {
+                for (int j = 0; j < n; ++j)
+                {
+                    if (i == perm[j])
+                        b[j] = 1.0;
+                    else
+                        b[j] = 0.0;
+                }
+                double[] x = HelperSolve(lum, b);
+                for (int j = 0; j < n; ++j)
+                    result[j, i] = x[j];
+            }
+            timeP += bm.getElapsedSeconds();
+            return result;
+        }
+
         #endregion
 
         #region Rouding

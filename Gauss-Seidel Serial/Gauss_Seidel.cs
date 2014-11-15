@@ -32,10 +32,8 @@ namespace Gauss_Seidel_Serial
             Matrix.Decompose(A, out L, out U);
             sequential += bm2.getElapsedSeconds();
 
-            bm2.start();
             // Inverse matrix L*
-            Matrix L_1 = ~L;
-            parallel += bm2.getElapsedSeconds();
+            Matrix L_1 = Matrix.InverseAlt(L, ref sequential, ref parallel);
 
             // Main iteration: x (at step k+1) = T * x (at step k) + C
             // where T = - (inverse of L*) * U, and C = (inverse of L*) * b
