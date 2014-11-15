@@ -576,8 +576,12 @@ namespace Gauss_Seidel_Serial
             }
             Matrix re = new Matrix(m.row, columns);
             for (int i = 0; i < m.row; i++)
-                for (int j = 0; j < columns; j++)
-                    re[i, j] = m[i, j + start];
+            {
+                Buffer.BlockCopy(m._matrix, (start + i * m.column) * sizeof(Double), re._matrix, i * re.column * sizeof(Double), columns * sizeof(Double));
+            }
+            //for (int i = 0; i < m.row; i++)
+            //    for (int j = 0; j < columns; j++)
+            //        re[i, j] = m[i, j + start];
             return re;
         }
 
