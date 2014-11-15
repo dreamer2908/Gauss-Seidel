@@ -39,7 +39,10 @@ namespace Gauss_Seidel_Parallel
                 n = matrix.dim1;
                 lum = LUPDecompose(matrix, out perm, out toggle);
             }
+            bm.pause();
+            timeS += bm.getElapsedSeconds();
 
+            bm.start();
             comm.Broadcast(ref n, 0);
             comm.Broadcast(ref lum, 0);
             if (comm.Rank != 0)
@@ -49,19 +52,27 @@ namespace Gauss_Seidel_Parallel
             comm.Broadcast(ref perm, 0);
             comm.Broadcast(ref toggle, 0);
             comm.Barrier();
+            bm.pause();
+            timeC += bm.getElapsedSeconds();
 
             if (lum == null)
             {
                 return zeroLike(matrix);
             }
 
+            bm.start();
             Double det = 0;
             if (comm.Rank == 0)
             {
                 det = Determinant(lum, perm, toggle);
             }
+            bm.pause();
+            timeS += bm.getElapsedSeconds();
+            bm.start();
             comm.Broadcast(ref det, 0);
             comm.Barrier();
+            bm.pause();
+            timeC += bm.getElapsedSeconds();
             if (det == 0) // not invertible
             {
                 // still return for the sake of simplicity
@@ -70,6 +81,7 @@ namespace Gauss_Seidel_Parallel
                 return zeroLike(matrix);
             }
 
+            bm.pause();
             int slaves = comm.Size;
             Matrix jobDistro = Utils.splitJob(n, slaves);
             int startCol = 0, endCol = 0, size = (int)jobDistro[0, comm.Rank];
@@ -85,8 +97,10 @@ namespace Gauss_Seidel_Parallel
                     break;
                 }
             }
-            timeS += bm.getElapsedSeconds();
+            bm.pause();
+            timeP += bm.getElapsedSeconds();
 
+            bm.start();
             Matrix result = new Matrix(n, size);
             for (int i = startCol; i < startCol + size; ++i)
             {
@@ -104,14 +118,15 @@ namespace Gauss_Seidel_Parallel
                     result[j, i - startCol] = x[j];
                 }
             }
+            bm.pause();
+            timeP += bm.getElapsedSeconds();
 
             bm.start();
             // collect result
             result = comm.Reduce(result, ConcatenateColumn, 0);
-
             bm.pause();
             timeP += bm.getElapsedSeconds();
-            timeC += bm.getElapsedSeconds();
+
             return result;
         }
     }

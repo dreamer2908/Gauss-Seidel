@@ -36,29 +36,33 @@ namespace Gauss_Seidel_Parallel
                 size = A.Height;
                 Matrix.Decompose(A, out L, out U);
             }
+            bm2.pause();
+            sequential += bm2.getElapsedSeconds();
 
+            bm2.start();
             comm.Broadcast(ref size, 0);
             comm.Broadcast(ref U, 0);
             comm.Broadcast(ref b, 0);
-            sequential += bm2.getElapsedSeconds();
+            bm2.pause();
+            communication += bm2.getElapsedSeconds();
 
             // Inverse matrix L*
             comm.Barrier();
             L_1 = MatrixParallel.Inverse(L, comm, ref sequential, ref parallel, ref communication);
+            bm2.start();
             comm.Broadcast(ref L_1, 0);
+            bm2.pause();
+            communication += bm2.getElapsedSeconds();
 
             // Main iteration: x (at step k+1) = T * x (at step k) + C
             // where T = - (inverse of L*) * U, and C = (inverse of L*) * b
-
-            bm2.start();
-            // init necessary variables
-            x = Matrix.zeroLike(b); // at step k
 
             // split T & C into groups of rows, each for one slave, according to the nature of this algorithm
             // each slave will have one piece of T & one piece of C stored locally. the rest of T & C is not needed
             // there might be cases where jobs > slaves, so some might get no job at all
             // Changes: only split L_1. Slaves will calculate T & C (pieces) themselves
             // Changes: slaves will split L_1 themselves
+            bm2.start();
             Matrix jobDistro = Utils.splitJob(size, comm.Size);
             int startRow = 0, endRow = 0, myJobSize = (int)jobDistro[0, comm.Rank];
             for (int p = 0; p < comm.Size; p++)
@@ -82,6 +86,7 @@ namespace Gauss_Seidel_Parallel
             // if it still doesn't converge after this many loops, assume it won't converge and give up
             Boolean converge = false;
             int loopLimit = 100;
+            x = Matrix.zeroLike(b); // at step k
             for (loops = 0; loops < loopLimit; loops++)
             {
                 bm3.start();
@@ -124,6 +129,7 @@ namespace Gauss_Seidel_Parallel
                 err = A * x - b;
                 err.Round(1e-14);
             }
+            bm2.pause();
             sequential += bm2.getElapsedSeconds();
 
             bm.pause();
