@@ -536,7 +536,7 @@ namespace Gauss_Seidel_Serial
             }
             if (start < 0 || end > m.Height)
             {
-                Exception e = new Exception("start must be greater than 0, and end must be equal to or smaller than matrix m's height!");
+                Exception e = new Exception("Start can't be negative, and end can't exceed the height of matrix m!");
                 throw e;
             }
             int rows = end - start + 1;
@@ -565,7 +565,7 @@ namespace Gauss_Seidel_Serial
             }
             if (start < 0 || end > m.column)
             {
-                Exception e = new Exception("Start must be greater than 0, and end must be equal to or smaller than matrix m's height!");
+                Exception e = new Exception("Start can't be negative, and end can't exceed the width of matrix m!");
                 throw e;
             }
             int columns = end - start + 1;
