@@ -49,10 +49,6 @@ namespace Gauss_Seidel_Parallel
             // Inverse matrix L*
             comm.Barrier();
             L_1 = MatrixParallel.Inverse(L, comm, ref sequential, ref parallel, ref communication);
-            bm2.start();
-            comm.Broadcast(ref L_1, 0);
-            bm2.pause();
-            communication += bm2.getElapsedSeconds();
 
             // Main iteration: x (at step k+1) = T * x (at step k) + C
             // where T = - (inverse of L*) * U, and C = (inverse of L*) * b
@@ -61,7 +57,6 @@ namespace Gauss_Seidel_Parallel
             // each slave will have one piece of T & one piece of C stored locally. the rest of T & C is not needed
             // there might be cases where jobs > slaves, so some might get no job at all
             // Changes: only split L_1. Slaves will calculate T & C (pieces) themselves
-            // Changes: slaves will split L_1 themselves
             bm2.start();
             Matrix jobDistro = Utils.splitJob(size, comm.Size);
             int startRow = 0, endRow = 0, myJobSize = (int)jobDistro[0, comm.Rank];
@@ -77,7 +72,24 @@ namespace Gauss_Seidel_Parallel
                     break;
                 }
             }
-            Matrix L_1P = Matrix.extractRows(L_1, startRow, endRow);
+            Matrix[] L_1Ps = new Matrix[comm.Size];
+            if (comm.Rank == 0)
+            {
+                int slaveStart = 0;
+                for (int p = 0; p < comm.Size; p++)
+                {
+                    L_1Ps[p] = Matrix.extractRows(L_1, slaveStart, slaveStart + (int)jobDistro[0, p] - 1);
+                    slaveStart += (int)jobDistro[0, p];
+                }
+            }
+            bm2.pause();
+            sequential += bm2.getElapsedSeconds();
+
+            bm2.start();
+            Matrix L_1P = comm.Scatter(L_1Ps, 0);
+            bm2.pause();
+            communication += bm2.getElapsedSeconds();
+            bm2.start();
             Matrix T = -L_1P * U; Matrix C = L_1P * b;
             bm2.pause();
             parallel += bm2.getElapsedSeconds();
