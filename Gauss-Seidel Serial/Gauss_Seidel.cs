@@ -87,7 +87,7 @@ namespace Gauss_Seidel_Serial
             {
                 Console.WriteLine("Sequential part took " + sequential + " secs.");
                 Console.WriteLine("Parallel part took " + parallel + " secs.");
-                Console.WriteLine("Total: " + bm.getResult() + " (" + bm.getElapsedSeconds() + " secs). Sum: " + (sequential + parallel));
+                Console.WriteLine("Total: " + bm.getResult() + " (" + bm.getElapsedSeconds() + " secs). Seq + Parallel: " + (sequential + parallel));
             }
 
             return converge;

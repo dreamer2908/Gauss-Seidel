@@ -42,30 +42,17 @@ namespace Gauss_Seidel_Serial
 
         static public Matrix zero(int size)
         {
-            Matrix re = new Matrix(size, size);
-            for (int x = 0; x < size; x++)
-                for (int y = 0; y < size; y++)
-                    re[x, y] = 0;
-            return re;
+            return new Matrix(size, size);
         }
 
         static public Matrix zero(int dim1, int dim2)
         {
-            Matrix re = new Matrix(dim1, dim2);
-            for (int x = 0; x < dim1; x++)
-                for (int y = 0; y < dim2; y++)
-                    re[x, y] = 0;
-            return re;
+            return new Matrix(dim1, dim2);
         }
 
         static public Matrix zeroLike(Matrix m)
         {
-            int dim1 = m.dim1, dim2 = m.dim2;
-            Matrix re = new Matrix(dim1, dim2);
-            for (int x = 0; x < dim1; x++)
-                for (int y = 0; y < dim2; y++)
-                    re[x, y] = 0;
-            return re;
+            return new Matrix(m.dim1, m.dim2);
         }
 
         public void zeroFill()

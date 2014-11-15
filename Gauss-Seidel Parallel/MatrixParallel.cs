@@ -114,57 +114,5 @@ namespace Gauss_Seidel_Parallel
             timeC += bm.getElapsedSeconds();
             return result;
         }
-
-        private static void gtfo(Intracommunicator comm)
-        {
-            for (int i = 1; i < comm.Size; i++)
-            {
-                comm.Send("exit", i, 10);
-            }
-        }
-
-        public static void Inverse(Intracommunicator comm, ref double timeC)
-        {
-            Matrix lum = null, result = null;
-            int[] perm = null;
-            int offset = 0, size = 0, n = 0;
-            benchmark bm = new benchmark();
-            string command;
-            do
-            {
-                command = comm.Receive<string>(0, 10);
-                switch (command)
-                {
-                    case "start":
-                        {
-                            result = new Matrix(n, size);
-                            for (int i = offset; i < offset + size; ++i)
-                            {
-                                double[] b = new double[n];
-                                for (int j = 0; j < n; ++j)
-                                {
-                                    if (i == perm[j])
-                                        b[j] = 1.0;
-                                    else
-                                        b[j] = 0.0;
-                                }
-                                double[] x = HelperSolve(lum, b);
-                                for (int j = 0; j < n; ++j)
-                                {
-                                    result[j, i - offset] = x[j];
-                                }
-                            }
-                            bm.pause();
-                            comm.Send("done", 0, 10);
-                            break;
-                        }
-                    case "send_re": bm.start(); comm.Send(result, 0, 10); timeC += bm.getElapsedSeconds(); break;
-                    case "recv_lum": bm.start(); lum = comm.Receive<Matrix>(0, 11); timeC += bm.getElapsedSeconds(); n = lum.dim1; perm = new int[n]; break;
-                    case "recv_perm": bm.start(); comm.Receive(0, 12, ref perm); timeC += bm.getElapsedSeconds(); break;
-                    case "set_offset": offset = comm.Receive<int>(0, 13); break;
-                    case "set_size": size = comm.Receive<int>(0, 14); break;
-                }
-            } while (command != "exit");
-        }
     }
 }

@@ -154,7 +154,8 @@ namespace Gauss_Seidel_Parallel.Test
                         command = comm.Receive<string>(0, 0); // receive command from rank 0
                         if (command == "start")
                         {
-                            Gauss_Seidel_Parallel.solveSub(comm);
+                            Matrix A = null, b = null, x, err; int loops;
+                            Gauss_Seidel_Parallel.solve(A, b, out x, out err, out loops, comm);
                         }
                     } while (command != "exit");
                 }

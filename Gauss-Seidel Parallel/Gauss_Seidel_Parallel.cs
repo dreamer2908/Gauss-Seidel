@@ -88,12 +88,12 @@ namespace Gauss_Seidel_Parallel
                 // (re-)distributing x vector. Must be done every single loop
                 // this loop needs x from the previous loop
                 comm.Broadcast(ref x, 0);
-                comm.Barrier();
                 bm3.pause();
                 communication += bm3.getElapsedSeconds();
 
                 // calculation step
                 bm3.start();
+                comm.Barrier();
                 Matrix new_x = T * x + C;
 
                 // check convergence
@@ -105,7 +105,7 @@ namespace Gauss_Seidel_Parallel
 
                 // collect convergence. consider converged if ALL slaves claim so
                 converge = comm.Reduce(converge, bothTrue, 0);
-                comm.Broadcast(ref converge, 0);
+                comm.Broadcast(ref converge, 0); // make sure EVERYONE breaks/coninues
                 bm3.pause();
                 parallel += bm3.getElapsedSeconds();
                 if (converge)
@@ -132,7 +132,7 @@ namespace Gauss_Seidel_Parallel
                 Console.WriteLine("Sequential part took " + sequential + " secs.");
                 Console.WriteLine("Parallel part took " + parallel + " secs.");
                 Console.WriteLine("Communication took " + communication + " secs.");
-                Console.WriteLine("Total: " + bm.getResult() + " (" + bm.getElapsedSeconds() + " secs). Sum: " + (sequential + parallel));
+                Console.WriteLine("Total: " + bm.getResult() + " (" + bm.getElapsedSeconds() + " secs). Seq + Parallel: " + (sequential + parallel));
             }
 
             return converge;
@@ -141,53 +141,6 @@ namespace Gauss_Seidel_Parallel
         private static Boolean bothTrue(Boolean v1, Boolean v2)
         {
             return v1 && v2;
-        }
-
-        private static void sendMsgToAllSlaves(Intracommunicator comm, string msg)
-        {
-            for (int i = 1; i < comm.Size; i++)
-            {
-                comm.Send(msg, i, 10);
-            }
-        }
-
-        // method ranks 1+ call. does the actual iterating calculation
-        public static void solveSub(Intracommunicator comm)
-        {
-            // receive x, C, and rows of T from main
-            // loop new_x = T * x + C
-            // only do something when master (rank 0) tells it to
-            // command: continue, sendx, receivex, receivet, receivec, exit
-
-            Matrix T = null, C = null, x = null, new_x = null, L_1 = null, U = null, b = null;
-            int startRow = 0;
-            bool converge = false;
-            double convergeThreshold = 1e-15, timeC = 0;
-            benchmark bm = new benchmark();
-
-            string command;
-            do
-            {
-                command = comm.Receive<string>(0, 10);
-                switch (command)
-                {
-                    case "calc_x": new_x = T * x + C; converge = Matrix.SomeClose(new_x, x, convergeThreshold, startRow); comm.Send("done", 0, 10); break;
-                    case "calc_tc": T = -L_1 * U; C = L_1 * b; break;
-                    case "send_x": comm.Send(new_x, 0, 10); break;
-                    case "converge": comm.Send(converge, 0, 16); break;
-                    case "rec_t": bm.start(); T = comm.Receive<Matrix>(0, 11); timeC += bm.getElapsedSeconds(); break;
-                    case "rec_c": bm.start(); C = comm.Receive<Matrix>(0, 12); timeC += bm.getElapsedSeconds(); break;
-                    case "rec_x": bm.start(); x = comm.Receive<Matrix>(0, 13); timeC += bm.getElapsedSeconds(); break;
-                    case "set_startrow": startRow = comm.Receive<int>(0, 14); break;
-                    case "set_threshold": convergeThreshold = comm.Receive<Double>(0, 15); break;
-                    case "rec_l": bm.start(); L_1 = comm.Receive<Matrix>(0, 16); timeC += bm.getElapsedSeconds(); break;
-                    case "rec_u": bm.start(); U = comm.Receive<Matrix>(0, 17); timeC += bm.getElapsedSeconds(); break;
-                    case "rec_b": bm.start(); b = comm.Receive<Matrix>(0, 18); timeC += bm.getElapsedSeconds(); break;
-                    case "inverse": MatrixParallel.Inverse(comm, ref timeC); break;
-                }
-            } while (command != "exit");
-            if (showBenchmark)
-                Console.WriteLine("Communication time @ rank " + comm.Rank + ": " + timeC.ToString());
         }
 
         // if u don't care about error
