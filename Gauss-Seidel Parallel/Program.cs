@@ -23,14 +23,6 @@ namespace Gauss_Seidel_Parallel
                     string programAuthor = "Quy N.H.";
                     Console.WriteLine(programName + " v" + programVer + " by " + programAuthor + "\n");
 
-                    // check number of processes in this communicator
-                    if (comm.Size < 2)
-                    {
-                        Console.WriteLine("Please run at least 2 processes of me.");
-                        Console.WriteLine("Exiting...");
-                        MPI.Environment.Abort(1);
-                    }
-
                     bool testing = false;
                     string[] args = _args;
                     if (testing)
@@ -112,7 +104,7 @@ namespace Gauss_Seidel_Parallel
                     benchmark bm = new benchmark();
                     string bmResult = "";
 
-                    Console.WriteLine("Now working with " + (comm.Size - 1).ToString() + " sub-processes...\n");
+                    Console.WriteLine("Now working with " + (comm.Size).ToString() + " process(es)...\n");
                     Gauss_Seidel_Parallel.showBenchmark = showBenchmark;
 
                     bm.start();
