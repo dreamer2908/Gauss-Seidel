@@ -927,7 +927,7 @@ namespace Gauss_Seidel_Serial
             }
 
             int n = matrix.dim1;
-            Matrix result = Matrix.Duplicate(matrix);
+            Matrix result = Matrix.zeroLike(matrix);
             int[] perm;
             int toggle;
             Matrix lum = LUPDecompose(matrix, out perm, out toggle);
