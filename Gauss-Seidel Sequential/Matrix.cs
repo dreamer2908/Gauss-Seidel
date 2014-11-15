@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Gauss_Seidel_Serial
+namespace Gauss_Seidel_Sequential
 {
     [Serializable]
     public class Matrix

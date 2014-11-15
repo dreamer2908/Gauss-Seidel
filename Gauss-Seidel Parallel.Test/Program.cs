@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gauss_Seidel_Serial;
+using Gauss_Seidel_Sequential;
 using MPI;
 
 namespace Gauss_Seidel_Parallel.Test

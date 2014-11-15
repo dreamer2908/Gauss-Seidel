@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gauss_Seidel_Serial
+namespace Gauss_Seidel_Sequential
 {
     class Program
     {
         static void Main(string[] _args)
         {
             string programName = "Gauss-Seidel Linear System of Equations Solver";
-            string programVer = "1.0 (serial)";
+            string programVer = "1.0 (sequential)";
             string programAuthor = "Quy N.H.";
             Console.WriteLine(programName + " v" + programVer + " by " + programAuthor + "\n");
 

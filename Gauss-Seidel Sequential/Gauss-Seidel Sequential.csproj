@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{955836F7-59F0-4291-81CC-7121B96798BA}</ProjectGuid>
+    <ProjectGuid>{928969AD-6AE3-4B03-9110-4992B92501CB}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Gauss_Seidel_Serial.Test</RootNamespace>
-    <AssemblyName>Gauss-Seidel Serial.Test</AssemblyName>
+    <RootNamespace>Gauss_Seidel_Sequential</RootNamespace>
+    <AssemblyName>Gauss-Seidel Sequential</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -33,18 +33,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\External\NUnit-2.6.3\bin\framework\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.mocks, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\External\NUnit-2.6.3\bin\framework\nunit.mocks.dll</HintPath>
-    </Reference>
-    <Reference Include="pnunit.framework, Version=1.0.5031.28843, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\External\NUnit-2.6.3\bin\framework\pnunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -59,15 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Gauss_SeidelTest.cs" />
-    <Compile Include="MatrixTest.cs" />
+    <Compile Include="Gauss_Seidel.cs" />
+    <Compile Include="Matrix.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="..\Gauss-Seidel Serial\Matrix.cs" />
-    <Compile Include="..\Gauss-Seidel Serial\Gauss_Seidel.cs" />
-    <Compile Include="..\Gauss-Seidel Serial\Utils.cs" />
-    <Compile Include="..\Gauss-Seidel Serial\benchmark.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UtilsTest.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="benchmark.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

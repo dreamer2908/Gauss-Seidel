@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
-namespace Gauss_Seidel_Serial.Test
+namespace Gauss_Seidel_Sequential.Test
 {
     [TestFixture]
     public class MatrixTest

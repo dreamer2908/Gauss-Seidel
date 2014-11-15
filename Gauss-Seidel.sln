@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C# Express 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauss-Seidel Serial", "Gauss-Seidel Serial\Gauss-Seidel Serial.csproj", "{928969AD-6AE3-4B03-9110-4992B92501CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauss-Seidel Sequential", "Gauss-Seidel Sequential\Gauss-Seidel Sequential.csproj", "{928969AD-6AE3-4B03-9110-4992B92501CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauss-Seidel Parallel", "Gauss-Seidel Parallel\Gauss-Seidel Parallel.csproj", "{8BC72392-F84E-44A5-902F-BDBC19224CCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauss-Seidel Serial.Test", "Gauss-Seidel Serial.Test\Gauss-Seidel Serial.Test.csproj", "{955836F7-59F0-4291-81CC-7121B96798BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauss-Seidel Sequential.Test", "Gauss-Seidel Sequential.Test\Gauss-Seidel Sequential.Test.csproj", "{955836F7-59F0-4291-81CC-7121B96798BA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauss-Seidel Parallel.Test", "Gauss-Seidel Parallel.Test\Gauss-Seidel Parallel.Test.csproj", "{0A5C30D5-4599-4702-8220-25743C7B9F24}"
 EndProject

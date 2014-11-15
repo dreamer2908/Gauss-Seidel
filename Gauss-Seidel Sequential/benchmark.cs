@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 
-namespace Gauss_Seidel_Serial
+namespace Gauss_Seidel_Sequential
 {
     class benchmark
     {

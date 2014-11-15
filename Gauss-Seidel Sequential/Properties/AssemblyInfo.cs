@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Gauss-Seidel Serial")]
+[assembly: AssemblyTitle("Gauss-Seidel Sequential")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("UIT")]
-[assembly: AssemblyProduct("Gauss-Seidel Serial")]
+[assembly: AssemblyProduct("Gauss-Seidel Sequential")]
 [assembly: AssemblyCopyright("Copyright © UIT 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

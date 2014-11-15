@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gauss_Seidel_Serial
+namespace Gauss_Seidel_Sequential
 {
     class Utils
     {

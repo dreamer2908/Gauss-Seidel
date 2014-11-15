@@ -15,10 +15,10 @@ x64/
 x86/
 build/
 bld/
-./Gauss-Seidel Serial/[Bb]in/
-./Gauss-Seidel Serial/[Oo]bj/
-./Gauss-Seidel Serial.Test/[Bb]in/
-./Gauss-Seidel Serial.Test/[Oo]bj/
+./Gauss-Seidel Sequential/[Bb]in/
+./Gauss-Seidel Sequential/[Oo]bj/
+./Gauss-Seidel Sequential.Test/[Bb]in/
+./Gauss-Seidel Sequential.Test/[Oo]bj/
 ./Gauss-Seidel Parallel/[Bb]in/
 ./Gauss-Seidel Parallel/[Oo]bj/
 ./Gauss-Seidel Parallel.Test/[Bb]in/

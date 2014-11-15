@@ -51,9 +51,9 @@
     <Compile Include="Gauss_Seidel_Parallel.cs" />
     <Compile Include="MatrixParallel.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="..\Gauss-Seidel Serial\Matrix.cs" />
-    <Compile Include="..\Gauss-Seidel Serial\benchmark.cs" />
-    <Compile Include="..\Gauss-Seidel Serial\Utils.cs" />
+    <Compile Include="..\Gauss-Seidel Sequential\Matrix.cs" />
+    <Compile Include="..\Gauss-Seidel Sequential\benchmark.cs" />
+    <Compile Include="..\Gauss-Seidel Sequential\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
