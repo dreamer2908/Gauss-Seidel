@@ -222,7 +222,7 @@ namespace Gauss_Seidel_Sequential
 
         public static Matrix operator *(Matrix m1, Matrix m2)
         {
-            return UnsafeMultiplication(m1, m2);
+            return MultiplyUnsafe(m1, m2);
         }
 
         public static Matrix operator *(Matrix m1, Double scalar)
@@ -312,35 +312,34 @@ namespace Gauss_Seidel_Sequential
             return re;
         }
 
-        // see http://www.bratched.com/en/home/dotnet/48-fun-with-matrix-multiplication-and-unsafe-code.html
-        public unsafe static Matrix UnsafeMultiplication(Matrix m1, Matrix m2)
+        // pretty much the same as normal multiplication, just using pointer to bypass unnecessary operations
+        // looks like a C/C++ function lel
+        public unsafe static Matrix MultiplyUnsafe(Matrix m1, Matrix m2)
         {
-            int h = m1.Height;
-            int w = m2.Width;
-            int l = m1.Width;
-            Matrix resultMatrix = new Matrix(h, w);
+            int height = m1.Height;
+            int width = m2.Width;
+            int commonLength = m1.Width;
+            Matrix re = new Matrix(height, width);
             unsafe
             {
-                fixed (double* pm = resultMatrix._matrix, pm1 = m1._matrix, pm2 = m2._matrix)
+                fixed (double* pmRe = re._matrix, pmM1 = m1._matrix, pmM2 = m2._matrix)
                 {
-                    int i1, i2;
-                    for (int i = 0; i < h; i++)
+                    for (int i = 0; i < height; i++)
                     {
-                        i1 = i * l;
-                        for (int j = 0; j < w; j++)
+                        for (int j = 0; j < width; j++)
                         {
-                            i2 = j;
-                            double res = 0;
-                            for (int k = 0; k < l; k++, i2 += w)
+                            double total = 0;
+                            for (int k = 0; k < commonLength; k++)
                             {
-                                res += pm1[i1 + k] * pm2[i2];
+                                total += pmM1[i * commonLength + k] * pmM2[j + k * width];
                             }
-                            pm[i * w + j] = res;
+                            pmRe[i * width + j] = total;
                         }
                     }
                 }
             }
-            return resultMatrix;
+
+            return re;
         }
 
         // Scalar multiply matrix m1 by 1/scalar
