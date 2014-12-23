@@ -345,7 +345,7 @@ namespace Gauss_Seidel_Sequential
         // Scalar multiply matrix m1 by 1/scalar
         public static Matrix Divide(Matrix m1, Double scalar)
         {
-            return Multiply(m1, 1/scalar);
+            return m1 * (1/scalar);
         }
 
         // Calculate product of matrix m1 and the inverse matrix of m2.
