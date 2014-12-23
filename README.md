@@ -29,28 +29,32 @@ Input files should be in this format.
  - Size
  - A matrix (each row in a separated line, numbers in a row are separated by a space)
  - RHS vector (all in one line)
- - Expected result (all in one line, if needed)
+ - Expected result (all in one line, if necessary)
  - A line of `-------------` between each input linear system
 
 Example:
 
-`4
+```
+4
 10 -1 2 0
 -1 11 -1 3
 2 -1 10 -1
 0 3 -1 8
 6 25 -11 15
 1 2 −1 1
--------------`
+-------------
+```
 
 for
 
-`10.0*x1 + -1.0*x2 + 2.0*x3 + 0.0*x4 = 6.0
+```
+10.0*x1 + -1.0*x2 + 2.0*x3 + 0.0*x4 = 6.0
 -1.0*x1 + 11.0*x2 + -1.0*x3 + 3.0*x4 = 25.0
 2.0*x1 + -1.0*x2 + 10.0*x3 + -1.0*x4 = -11.0
-0.0*x1 + 3.0*x2 + -1.0*x3 + 8.0*x4 = 15.0`
+0.0*x1 + 3.0*x2 + -1.0*x3 + 8.0*x4 = 15.0
 The exact solution of the system is (1, 2, −1, 1).
+```
 
 Note:
  - Expected result line is optional and is actually not used.
- - There's no empty line between lines. See the raw file.
+ - Multiple systems can be put in a single file.
