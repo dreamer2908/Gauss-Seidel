@@ -168,6 +168,7 @@ namespace Gauss_Seidel_Sequential.Test
         [TestCase(17, 17, 5, 1, 21, 18, 21, 0, 2, 2, 19, 3, 4, 6, -1, 5)]
         [TestCase(3, -5, -15, 1, 0, 2, -9, 10, 2, 3, -19, 23, -4, 0, -3, 5)]
         [TestCase(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+        [TestCase(10, -1, 2, 0, -1, 11, -1, 3, 2, -1, 10, -1, 0, 3, -1, 8)]
         public void Inverse_4x4Inputs_ChecksThem(int m1_00, int m1_01, int m1_02, int m1_03, int m1_10, int m1_11, int m1_12, int m1_13, int m1_20, int m1_21, int m1_22, int m1_23, int m1_30, int m1_31, int m1_32, int m1_33)
         {
             Matrix m1 = new Matrix(4, 4);
@@ -189,6 +190,7 @@ namespace Gauss_Seidel_Sequential.Test
             m1[3, 3] = m1_33;
             Matrix re = ~m1;
             // System.Windows.Forms.MessageBox.Show(re.ToString());
+            // Console.WriteLine(re.ToString(0.000001));
             Matrix unitM = Matrix.unit(4);
             Matrix zeroM = Matrix.zero(4);
             Matrix product = m1 * re;

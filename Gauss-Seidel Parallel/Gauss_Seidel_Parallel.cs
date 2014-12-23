@@ -12,7 +12,6 @@ namespace Gauss_Seidel_Parallel
         public static bool showBenchmark = false;
 
         // return true if it converges. Output: solution matrix, errors, loops it took
-        // rank 0 (master) calls this, while ranks 1+ call solveSub
         public static Boolean solve(Matrix A, Matrix b, out Matrix x, out Matrix err, out int loops, Intracommunicator comm)
         {
             // check sanity. rank 0 only

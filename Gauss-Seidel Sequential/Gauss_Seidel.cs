@@ -47,6 +47,8 @@ namespace Gauss_Seidel_Sequential
             Matrix T = -L_1 * U;
             Matrix C = L_1 * b;
             parallel += bm2.getElapsedSeconds();
+            // Console.WriteLine(T.ToString(0.00001));
+            // Console.WriteLine(C.ToString(0.00001));
 
             // the actual iteration
             // if it still doesn't converge after this many loops, assume it won't converge and give up
@@ -59,6 +61,8 @@ namespace Gauss_Seidel_Sequential
             for (; loops < loopLimit; loops++)
             {
                 new_x = T * x + C; // yup, only one line
+                // Console.WriteLine("Loop #" + loops);
+                // Console.WriteLine(new_x.ToString(0.00001));
 
                 // consider it's converged if it changes less than threshold (1e-15)
                 if (converge = Matrix.AllClose(new_x, x, 1e-15))
